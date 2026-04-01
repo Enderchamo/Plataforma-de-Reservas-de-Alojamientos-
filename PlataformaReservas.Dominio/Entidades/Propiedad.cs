@@ -1,50 +1,28 @@
-using System.Data.Common;
+using System;
 
-namespace PlataformaReservas.Dominio;
+namespace PlataformaReservas.Dominio.Entidades;
 
-public class Reserva
+public class Propiedad
 {
-    public int Id { get; protected set; }
-    public DateTime FechaEntrada { get; private set; }
-    public DateTime FechaSalida { get; private set; }
+    public string Titulo {get; private set;}
 
-    public enum EstadoEnum
+    public string Direccion {get; private set;}
+
+    public decimal PrecioPorNoche {get; private set;}
+
+    public int HostId {get; private set;}
+
+    public Propiedad(string titulo, string direccion, decimal precioPorNoche, int hostId)
     {
-        Confirmada, Cancelada, Completada
-    }
-
-    public EstadoEnum Estado { get; protected set; }
-
-
-
-    public Reserva(int id, DateTime fechaEntrada, DateTime fechaSalida)
-    {
-        this.Estado = EstadoEnum.Confirmada;
-        this.FechaEntrada= fechaEntrada;
-        this.FechaSalida= fechaSalida;
-    }
-
-    public void CancelarEstado()
-    {
-        if (Estado != EstadoEnum.Confirmada)
-        {
-            throw new InvalidOperationException("No se puede cancelar la reserva. La reserva no está confirmada.");
-        }
-
-        Estado = EstadoEnum.Cancelada;
-    }
-
-    public void CompletarEstado()
-    {
-        if (Estado != EstadoEnum.Confirmada || DateTime.Now < FechaSalida)
-        {
-            throw new InvalidOperationException("No se puede completar la reserva. La reserva no está confirmada o la fecha de salida no ha pasado.");
-        }
-
-        Estado = EstadoEnum.Completada;
+        Titulo=titulo;
+        Direccion= direccion;
         
+        if (precioPorNoche <= 0)
+        {
+            throw new ArgumentException ("Precio debe ser mayor a 0");
+        }
+
+        PrecioPorNoche= precioPorNoche;
+        HostId= hostId;
     }
-    
 }
-
-
