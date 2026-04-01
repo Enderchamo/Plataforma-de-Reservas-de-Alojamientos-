@@ -1,0 +1,6 @@
+@PlataformaReservas.Presentacion_HostAddress = http://localhost:5085
+
+GET {{PlataformaReservas.Presentacion_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

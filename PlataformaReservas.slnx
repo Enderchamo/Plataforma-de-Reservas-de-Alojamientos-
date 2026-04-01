@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="PlataformaReservas.Aplicacion/PlataformaReservas.Aplicacion.csproj" />
+  <Project Path="PlataformaReservas.Dominio/PlataformaReservas.Dominio.csproj" />
+  <Project Path="PlataformaReservas.Infraestructura/PlataformaReservas.Infraestructura.csproj" />
+  <Project Path="PlataformaReservas.Presentacion/PlataformaReservas.Presentacion.csproj" />
+</Solution>
