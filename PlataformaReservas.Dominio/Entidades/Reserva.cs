@@ -1,10 +1,11 @@
-using System.Data.Common;
-
 namespace PlataformaReservas.Dominio;
 
 public class Reserva
 {
     public int Id { get; protected set; }
+
+    public int PropiedadId { get; private set; }
+    public int UsuarioInvitadoId { get; private set; }
     public DateTime FechaEntrada { get; private set; }
     public DateTime FechaSalida { get; private set; }
 
@@ -17,11 +18,13 @@ public class Reserva
 
 
 
-    public Reserva(int id, DateTime fechaEntrada, DateTime fechaSalida)
+    public Reserva(int propiedadId,int usuarioInvitadoId, DateTime fechaEntrada, DateTime fechaSalida)
     {
         Estado = EstadoEnum.Confirmada;
         FechaEntrada= fechaEntrada;
         FechaSalida= fechaSalida;
+        PropiedadId = propiedadId;
+        UsuarioInvitadoId = usuarioInvitadoId;
     }
 
     public void CancelarEstado()
@@ -36,7 +39,7 @@ public class Reserva
 
     public void CompletarEstado()
     {
-        if (Estado != EstadoEnum.Confirmada || DateTime.Now < FechaSalida)
+        if (Estado != EstadoEnum.Confirmada || DateTime.UtcNow < FechaSalida)
         {
             throw new InvalidOperationException("No se puede completar la reserva. La reserva no está confirmada o la fecha de salida no ha pasado.");
         }

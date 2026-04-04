@@ -4,30 +4,25 @@ namespace PlataformaReservas.Dominio.Entidades;
 
 public class Notificacion
 {
-    public int Id { get; private set;}
-
+    public int Id { get; private set; }
     public string? Mensaje { get; private set; }
     public DateTime FechaCreacion { get; private set; }
+    public bool Leida { get; private set; } 
+    public int UsuarioDestinatarioId { get; private set; } 
 
-    public bool leida { get; private set; }
-
-    public int UsuarioDestinatario { get; private set; }
-
-    public Notificacion(string mensaje, int usuarioDestinatario)
+    public Notificacion(string mensaje, int usuarioDestinatarioId)
     {
         Mensaje = mensaje;
-        UsuarioDestinatario = usuarioDestinatario;
-        FechaCreacion = DateTime.Now;
-        leida = false;
+        UsuarioDestinatarioId = usuarioDestinatarioId;
+        FechaCreacion = DateTime.UtcNow; 
+        Leida = false;
     }
 
-    public void MarcarComoLeido()
+    public void MarcarComoLeida()
     {
-        if (!this.leida)
+        if (!Leida)
         {
-            this.leida = true;
+            Leida = true;
         }
     }
-
-
 }
