@@ -9,7 +9,7 @@ public class Usuario
 
     public string Nombre { get; private set; }
     public string Email {get; private set;}
-    public string PasswordHash {get; private set;}
+    public string Password{get; private set;}
     public bool CuentaConfirmada {get; private set;}
     public bool EsHost{get; private set;}
     public bool EsGuest{get; private set;}
@@ -22,7 +22,7 @@ public class Usuario
     public ICollection<Notificacion> Notificaciones {get;private set;} = new List<Notificacion>();
 
 
-    public Usuario(string nombre,string email,string passwordHash, bool esHost, bool esGuest)
+    public Usuario(string nombre,string email,string password, bool esHost, bool esGuest)
     {
 
         if (!esHost && !esGuest)
@@ -39,7 +39,7 @@ public class Usuario
 
         Nombre = nombre;
         Email = email;
-        PasswordHash = passwordHash;
+        Password = password;
         EsGuest = esGuest;
         EsHost = esHost;
         CuentaConfirmada = false;

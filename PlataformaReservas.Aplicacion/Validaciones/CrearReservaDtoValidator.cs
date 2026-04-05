@@ -17,7 +17,7 @@ public class CrearReservaDtoValidator : AbstractValidator<CrearReservaDto>
 
 
         RuleFor(x=> x.FechaEntrada)
-            .GreaterThan(DateTime.Today).WithMessage("La fecha de inicio debe ser mayor a la fecha actual"); 
+            .GreaterThanOrEqualTo(DateTime.Today).WithMessage("La fecha de inicio debe ser mayor a la fecha actual"); 
 
         RuleFor(x=> x.FechaSalida)    
             .GreaterThan(x => x.FechaEntrada).WithMessage("La fecha de salida debe ser mayor a la fecha de entrada");

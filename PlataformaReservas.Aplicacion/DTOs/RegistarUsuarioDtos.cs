@@ -4,11 +4,14 @@ namespace PlataformaReservas.Aplicacion.DTOs;
 
 public class RegistrarUsuarioDto
 {
-    public string? Email {get; set;}
 
-    public string? PasswordHash {get; set;}
+    public string Nombre {get; init;}
 
-    public bool EsHost {get; set;}
+    public string Email {get; init;}
 
-    public bool EsGuest {get; set;}
+    public string Password{get; init;}
+
+    public bool EsHost {get; init;}
+
+    public bool EsGuest {get; init;}
 }

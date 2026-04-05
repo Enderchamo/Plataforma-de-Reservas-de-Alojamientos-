@@ -3,13 +3,17 @@ namespace PlataformaReservas.Aplicacion.DTOs;
 
 public class CrearPropiedadDto
 {
-    public string? Titulo {get;  set;}
+    public string Titulo {get;  init;}
 
-    public string? Direccion {get;set;}
+    public string Ubicacion  {get; init;}
 
-    public decimal PrecioPorNoche {get; set;}
+    public string Descripcion {get; init;}
 
-    public int HostId {get; set;}
+    public int Capacidad {get; init;}
+
+    public decimal PrecioPorNoche {get; init;}
+
+    public int HostId {get; init;}
 
 
 }
