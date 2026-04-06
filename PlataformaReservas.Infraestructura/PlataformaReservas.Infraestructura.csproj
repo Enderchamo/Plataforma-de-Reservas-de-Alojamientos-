@@ -2,6 +2,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PlataformaReservas.Aplicacion\PlataformaReservas.Aplicacion.csproj" />
+    <ProjectReference Include="..\PlataformaReservas.Dominio\PlataformaReservas.Dominio.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.5" />
   </ItemGroup>
 
   <PropertyGroup>

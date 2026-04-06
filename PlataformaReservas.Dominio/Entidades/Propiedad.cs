@@ -11,6 +11,7 @@ public class Propiedad
     public decimal PrecioPorNoche { get; private set; }
     public int Capacidad { get; private set; }      
     public int HostId { get; private set; }
+    public byte[]? Version { get; private set; }
 
     public Propiedad(string titulo, string descripcion, string ubicacion, decimal precioPorNoche, int capacidad, int hostId)
     {
