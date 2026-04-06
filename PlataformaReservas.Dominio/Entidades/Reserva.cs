@@ -1,4 +1,4 @@
-namespace PlataformaReservas.Dominio;
+namespace PlataformaReservas.Dominio.Entidades;
 
 public class Reserva
 {

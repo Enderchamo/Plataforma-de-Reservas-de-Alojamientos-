@@ -1,6 +1,6 @@
-using PlataformaReservas.Dominio.Entidades;
 
-namespace PlataformaReservas.Dominio;
+
+namespace PlataformaReservas.Dominio.Entidades;
 
 public class Usuario
 {
