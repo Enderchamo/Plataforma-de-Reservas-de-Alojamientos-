@@ -28,4 +28,20 @@ public class Propiedad
         Capacidad = capacidad;
         HostId = hostId;
     }
+
+
+    public void ActualizarDetalles(string titulo, string descripcion, string ubicacion, decimal precioPorNoche, int capacidad)
+    {
+        if (precioPorNoche <= 0)
+            throw new ArgumentException("El precio debe ser mayor a 0.");
+        
+        if (capacidad <= 0)
+            throw new ArgumentException("La capacidad debe ser de al menos 1 persona.");
+
+        Titulo = titulo;
+        Descripcion = descripcion;
+        Ubicacion = ubicacion;
+        PrecioPorNoche = precioPorNoche;
+        Capacidad = capacidad;
+    }
 }
