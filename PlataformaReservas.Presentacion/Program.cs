@@ -61,6 +61,7 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IPhotoService, PhotoService>();
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -105,6 +106,10 @@ var app = builder.Build();
     }
 
     app.UseHttpsRedirection();
+    app.UseStaticFiles(); 
+
+    app.UseAuthentication();
+    app.UseAuthorization();
 
    
     app.UseAuthentication();

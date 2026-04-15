@@ -12,10 +12,12 @@ namespace PlataformaReservas.Presentacion.Controllers
     public class PropiedadController : ControllerBase
     {
         private readonly IPropiedadService _propiedadService;
+        private readonly IPhotoService _photoService;
 
-        public PropiedadController(IPropiedadService propiedadService)
+        public PropiedadController(IPropiedadService propiedadService,IPhotoService photoService)
         {
             _propiedadService = propiedadService;
+            _photoService = photoService;
         }
 
         [HttpGet("Buscar")]
@@ -135,5 +137,53 @@ namespace PlataformaReservas.Presentacion.Controllers
         }
 
 
+        [Authorize(Roles = "Host")]
+        [HttpPost("{id}/imagen")]
+        public async Task<IActionResult> SubirImagenPrincipal(int id, IFormFile? imagen) 
+        {
+            
+            if (imagen == null || imagen.Length == 0)
+            {
+                return BadRequest(new { error = "Por favor, selecciona una imagen para subir." });
+            }
+
+            try
+            {
+                var hostIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(hostIdClaim) || !int.TryParse(hostIdClaim, out int hostId))
+                    return Unauthorized();
+
+            
+                string rutaImagen = await _photoService.GuardarFotoPropiedadAsync(imagen);
+
+            
+                await _propiedadService.ActualizarImagenAsync(id, rutaImagen, hostId);
+
+                return Ok(new { 
+                    mensaje = "Imagen subida exitosamente",
+                    url = rutaImagen 
+                });
+            }
+
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, new { error = ex.Message });
+            }
+
+            catch (Exception)
+            {
+                return StatusCode(500, new { error = "Ocurrió un error al subir la imagen." });
+            }
+        }
     }
 }
