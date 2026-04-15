@@ -10,6 +10,7 @@ using PlataformaReservas.Aplicacion.Services;
 using PlataformaReservas.Dominio.Repositorios;
 using PlataformaReservas.Infraestructura.Persistencia;
 using PlataformaReservas.Infraestructura.Repositorios;
+using PlataformaReservas.Infraestructura.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +60,8 @@ builder.Services.AddControllers()
     
 builder.Services.AddEndpointsApiExplorer();
 
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 builder.Services.AddSwaggerGen(c =>
 {
     // Configuramos Swagger para que acepte el Token JWT
@@ -90,6 +93,7 @@ builder.Services.AddSwaggerGen(c =>
 
     
 });
+
 
 var app = builder.Build();
 

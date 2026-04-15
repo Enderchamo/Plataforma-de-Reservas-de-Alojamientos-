@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using Microsoft.EntityFrameworkCore;
 using PlataformaReservas.Dominio.Entidades;
 using PlataformaReservas.Dominio.Repositorios;
@@ -55,6 +56,42 @@ public class ReservaRepository : IReservaRepository
             );
 
             return !existeChoque;
+    }
+
+    public async Task CrearReservaSeguraAsync(Reserva reserva)
+    {
+    
+        using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+        
+        try
+        {
+        
+            bool existeChoque = await _context.Reservas
+                .AnyAsync(r =>
+                    r.PropiedadId == reserva.PropiedadId &&
+                    r.Estado != Reserva.EstadoEnum.Cancelada &&
+                    r.FechaEntrada < reserva.FechaSalida &&
+                    r.FechaSalida > reserva.FechaEntrada
+                );
+
+            if (existeChoque)
+            {
+                
+                throw new InvalidOperationException("La propiedad ya no está disponible."); 
+            }
+
+            await _context.Reservas.AddAsync(reserva);
+            await _context.SaveChangesAsync();
+            
+    
+            await transaction.CommitAsync();
+        }
+        catch (Exception)
+        {
+        
+            await transaction.RollbackAsync();
+            throw; 
+        }
     }
 
 }

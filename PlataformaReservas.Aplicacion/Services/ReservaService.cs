@@ -38,7 +38,7 @@ public class ReservaService : IReservaService
         }
 
         // Cambiar estado usando la lógica de negocio de la entidad.
-        reserva.CancelarEstado();
+        reserva.CancelarEstado(DateTime.UtcNow);
         await _reservaRepository.ActualizarAsync(reserva);
 
         var propiedad = await _propiedadRepository.ObtenerPorIdAsync(reserva.PropiedadId);
@@ -99,7 +99,7 @@ public class ReservaService : IReservaService
 
         var nuevaReserva = new Reserva(dto.PropiedadId, dto.UsuarioInvitadoId, dto.FechaEntrada, dto.FechaSalida);
 
-        await _reservaRepository.AgregarAsync(nuevaReserva);
+        await _reservaRepository.CrearReservaSeguraAsync(nuevaReserva);
 
         var mensaje = $"!Tienes una nueva reserva para '{propiedad.Titulo}' del {dto.FechaEntrada:dd/MM/yyyy} al {dto.FechaSalida:dd/MM/yyyy}!";
         await _notificacionRepository.AgregarAsync(new Notificacion(mensaje,propiedad.HostId));

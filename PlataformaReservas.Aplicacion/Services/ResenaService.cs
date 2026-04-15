@@ -48,6 +48,12 @@ public class ResenaService : IResenaService
             throw new InvalidOperationException("Solo puedes dejar una reseña si la reserva está Completada.");
         }
 
+        bool yaTieneResena = await _resenaRepository.ExisteResenaPorReservaAsync(resenaDTO.ReservaId);
+        if (yaTieneResena)
+        {
+            throw new InvalidOperationException("Ya has dejado una reseña para esta reserva. ¡Gracias por tu opinión!");
+        }
+
         var nuevaResena = new Resena(resenaDTO.ReservaId, resenaDTO.Calificacion, resenaDTO.Comentario);
         await _resenaRepository.AgregarAsync(nuevaResena);
 

@@ -27,11 +27,16 @@ public class Reserva
         UsuarioInvitadoId = usuarioInvitadoId;
     }
 
-    public void CancelarEstado()
+    public void CancelarEstado(DateTime fechaSolicitud)
     {
         if (Estado != EstadoEnum.Confirmada)
         {
             throw new InvalidOperationException("No se puede cancelar la reserva. La reserva no está confirmada.");
+        }
+
+        if (fechaSolicitud.Date >= FechaEntrada.Date)
+        {
+            throw new InvalidOperationException("Es demasiado tarde para cancelar esta reserva. Solo se permiten cancelaciones hasta un día antes de la llegada.");
         }
 
         Estado = EstadoEnum.Cancelada;
@@ -39,14 +44,21 @@ public class Reserva
 
     public void CompletarEstado()
     {
-        if (Estado != EstadoEnum.Confirmada || DateTime.UtcNow < FechaSalida)
+        if (Estado != EstadoEnum.Confirmada)
         {
-            throw new InvalidOperationException("No se puede completar la reserva. La reserva no está confirmada o la fecha de salida no ha pasado.");
+            throw new InvalidOperationException($"No se puede completar esta reserva porque actualmente está en estado: {Estado}. Solo se pueden completar reservas Confirmadas.");
+        }
+        
+        if (DateTime.UtcNow < FechaSalida)
+        {
+            throw new InvalidOperationException($"Aún no puedes completar esta reserva. Podrás hacerlo después de la fecha de salida ({FechaSalida:dd/MM/yyyy HH:mm}).");
         }
 
         Estado = EstadoEnum.Completada;
+        Estado = EstadoEnum.Completada;
         
     }
+
     
 }
 

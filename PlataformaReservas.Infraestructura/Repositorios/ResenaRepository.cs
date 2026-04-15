@@ -31,4 +31,9 @@ public class ResenaRepository : IResenaRepository
                     select resena;
         return await query.ToListAsync();
     }
+
+    public async Task<bool> ExisteResenaPorReservaAsync(int reservaId)
+    {
+        return await _context.Resenas.AnyAsync(r => r.ReservaId == reservaId);
+    }
 }

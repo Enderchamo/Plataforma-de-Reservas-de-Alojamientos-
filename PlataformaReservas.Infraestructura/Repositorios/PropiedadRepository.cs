@@ -38,6 +38,13 @@ public class PropiedadRepository : IPropiedadRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task<bool> ExistePropiedadPorTituloYHostAsync(string titulo, int hostId)
+    
+    {
+        return await _context.Propiedades
+            .AnyAsync(p => p.Titulo == titulo && p.HostId == hostId);
+    }
+
     public async Task<IEnumerable<Propiedad>> BusquedaPorFiltroAsync(string? ubicacion, decimal? precioPorNoche, int? capacidad, DateTime? fechaEntrada, DateTime? fechaSalida)
     {
         var query = _context.Propiedades.AsQueryable();
@@ -62,6 +69,7 @@ public class PropiedadRepository : IPropiedadRepository
             query = query.Where(p => 
             
                 !_context.Reservas.Any(r => 
+                
                     r.PropiedadId == p.Id && 
                     r.Estado != Reserva.EstadoEnum.Cancelada && // Ignoramos las canceladas
                     r.FechaEntrada < fechaSalida.Value && 

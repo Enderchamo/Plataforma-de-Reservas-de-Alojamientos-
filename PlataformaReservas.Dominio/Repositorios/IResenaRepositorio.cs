@@ -10,4 +10,6 @@ public interface IResenaRepository
 
     Task<IEnumerable<Resena>> ObtenerPorPropiedadIdAsync(int propiedadId);
     Task AgregarAsync(Resena resena);
+
+    Task<bool> ExisteResenaPorReservaAsync(int reservaId);
 }

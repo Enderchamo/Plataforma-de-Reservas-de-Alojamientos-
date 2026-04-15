@@ -66,6 +66,16 @@ public class PropiedadService : IPropiedadService
             throw new ValidationException(validacion.Errors);
         }
 
+
+        //  Evitar propiedades duplicadas exactas del mismo Host.
+        bool existeDuplicado = await _propiedadRepository.ExistePropiedadPorTituloYHostAsync(dto.Titulo, dto.HostId);
+        if (existeDuplicado)
+        {
+            throw new InvalidOperationException($"Ya tienes una propiedad registrada con el título '{dto.Titulo}'. Por favor, verifica tus publicaciones.");
+        }
+
+
+
         var nuevaPropiedad = new Propiedad(dto.Titulo, dto.Descripcion, dto.Ubicacion,dto.PrecioPorNoche,dto.Capacidad,dto.HostId);
         await _propiedadRepository.AgregarAsync(nuevaPropiedad);
 

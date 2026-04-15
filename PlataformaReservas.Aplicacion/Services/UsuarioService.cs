@@ -30,7 +30,9 @@ public class UsuarioService : IUsuarioService
         var existente = await _usuarioRepository.ObtenerPorEmailAsync(dto.Email);
         if (existente != null) throw new InvalidOperationException("El correo ya está registrado.");
 
-        var nuevo = new Usuario(dto.Nombre, dto.Email, dto.Password, dto.EsHost, dto.EsGuest);
+        string passwordHasheada = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+
+        var nuevo = new Usuario(dto.Nombre, dto.Email, passwordHasheada, dto.EsHost, dto.EsGuest);
         
         
         nuevo.GenerarTokenConfirmacion(Guid.NewGuid().ToString("N"), DateTime.UtcNow.AddHours(24));
@@ -46,12 +48,16 @@ public class UsuarioService : IUsuarioService
 
         var usuario = await _usuarioRepository.ObtenerPorEmailAsync(dto.Email);
         
-        if (usuario == null || usuario.Password != dto.Password)
+        if (usuario == null || !BCrypt.Net.BCrypt.Verify(dto.Password, usuario.Password))
+        {
             throw new UnauthorizedAccessException("Credenciales incorrectas.");
+        }
 
         // Un usuario no confirmado no puede iniciar sesión
         if (!usuario.CuentaConfirmada)
+        {
             throw new UnauthorizedAccessException("Debes confirmar tu cuenta por correo antes de entrar.");
+        }
 
         return usuario;
     }
