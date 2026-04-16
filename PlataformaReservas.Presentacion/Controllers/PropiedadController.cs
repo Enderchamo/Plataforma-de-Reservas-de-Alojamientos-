@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlataformaReservas.Aplicacion.DTOs;
 using PlataformaReservas.Aplicacion.Interfaces;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 
 namespace PlataformaReservas.Presentacion.Controllers
 {
@@ -115,7 +115,7 @@ namespace PlataformaReservas.Presentacion.Controllers
                     return Unauthorized();
                 }
 
-                await _propiedadService.ActualizarPropiedadAsync(id,dto,hostId);
+                await _propiedadService.ActualizarPropiedadAsync(id, dto);
                 return NoContent();
             }
             catch (FluentValidation.ValidationException ex)
@@ -140,23 +140,8 @@ namespace PlataformaReservas.Presentacion.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> EliminarPropiedad(int id)
         {
-            try
-            {
-                var hostIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(hostIdClaim) || !int.TryParse(hostIdClaim, out int hostId))
-                    return Unauthorized();
-
-                await _propiedadService.EliminarPropiedadAsync(id, hostId);
-                return NoContent(); // 204 No Content (Eliminación exitosa)
-            }
-            catch (InvalidOperationException ex)
-            {
-                return NotFound(new { error = ex.Message });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return StatusCode(403, new { error = ex.Message }); 
-            }
+            await _propiedadService.EliminarPropiedadAsync(id);
+            return NoContent();
         }
 
 
@@ -164,7 +149,7 @@ namespace PlataformaReservas.Presentacion.Controllers
         [HttpPost("{id}/imagen")]
         public async Task<IActionResult> SubirImagenPrincipal(int id, IFormFile? imagen) 
         {
-            
+            // 1. Validación básica de entrada
             if (imagen == null || imagen.Length == 0)
             {
                 return BadRequest(new { error = "Por favor, selecciona una imagen para subir." });
@@ -172,37 +157,26 @@ namespace PlataformaReservas.Presentacion.Controllers
 
             try
             {
-                var hostIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(hostIdClaim) || !int.TryParse(hostIdClaim, out int hostId))
-                    return Unauthorized();
-
-            
+                // 2. Guardamos el archivo físico (Aquí usamos el PhotoService)
                 string rutaImagen = await _photoService.GuardarFotoPropiedadAsync(imagen);
 
-            
-                await _propiedadService.ActualizarImagenAsync(id, rutaImagen, hostId);
+                // 3. Llamamos al servicio de propiedad (SIN pasar el hostId)
+                // El servicio obtendrá el ID automáticamente desde el IUserContext
+                await _propiedadService.ActualizarImagenAsync(id, rutaImagen);
 
                 return Ok(new { 
                     mensaje = "Imagen subida exitosamente",
                     url = rutaImagen 
                 });
             }
-
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
-
-            catch (InvalidOperationException ex)
+            catch (KeyNotFoundException ex)
             {
                 return NotFound(new { error = ex.Message });
             }
-
             catch (UnauthorizedAccessException ex)
             {
                 return StatusCode(403, new { error = ex.Message });
             }
-
             catch (Exception)
             {
                 return StatusCode(500, new { error = "Ocurrió un error al subir la imagen." });

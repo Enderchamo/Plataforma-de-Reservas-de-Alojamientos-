@@ -72,6 +72,9 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPhotoService, PhotoService>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUserContext, UserContext>();
 
 builder.Services.AddSwaggerGen(c =>
 {

@@ -18,6 +18,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\PlataformaReservas.Aplicacion\PlataformaReservas.Aplicacion.csproj" />
     <ProjectReference Include="..\PlataformaReservas.Infraestructura\PlataformaReservas.Infraestructura.csproj" />
   </ItemGroup>
