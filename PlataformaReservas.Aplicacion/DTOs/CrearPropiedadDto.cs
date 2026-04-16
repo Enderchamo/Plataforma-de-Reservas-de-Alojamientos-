@@ -13,7 +13,5 @@ public class CrearPropiedadDto
 
     public decimal PrecioPorNoche {get; init;}
 
-    public int HostId {get; init;}
-
-
+    public int HostId { get; set; }
 }
