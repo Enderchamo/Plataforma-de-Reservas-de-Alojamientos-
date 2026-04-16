@@ -63,7 +63,8 @@ namespace PlataformaReservas.Presentacion
 
         }
 
-        [HttpGet("propiedad/{propiedadId}")]
+        [HttpGet("propiedad/{propiedadId}")] 
+        [AllowAnonymous]
         public async Task<IActionResult> ObtenerFechasBloqueadas(int propiedadId)
         {
             var fechas = await _fechaBloqueadaService.ObtenerPorPropiedadAsync(propiedadId);

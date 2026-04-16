@@ -41,7 +41,7 @@ namespace PlataformaReservas.Presentacion.Controllers
 
                 var reserva = await _reservaService.CrearReservaAsync(dto);
                 {
-                    return Created("", reserva);
+                    return Created("", new { mensaje = "Reserva exitosa", id = reserva.Id });
                 }
             }
 

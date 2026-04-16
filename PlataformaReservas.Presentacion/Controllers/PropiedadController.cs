@@ -20,6 +20,29 @@ namespace PlataformaReservas.Presentacion.Controllers
             _photoService = photoService;
         }
 
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> ObtenerPropiedadPorId(int id)
+        {
+            try
+            {
+                
+                var propiedad = await _propiedadService.ObtenerPorIdAsync(id);
+                
+                if (propiedad == null)
+                {
+                    return NotFound(new { error = "Propiedad no encontrada." });
+                }
+
+                return Ok(propiedad);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "Ocurrió un error interno en el servidor." });
+            }
+        }
+
+
         [HttpGet("Buscar")]
         public async Task<IActionResult> BuscarPropiedades([FromQuery] string? ubicacion, [FromQuery] decimal? precioMaximo, [FromQuery] int? capacidadMinimas,[FromQuery]DateTime? fechaEntrada, [FromQuery]DateTime? fechaSalida)
         {

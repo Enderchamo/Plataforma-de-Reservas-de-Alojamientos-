@@ -14,6 +14,16 @@ using PlataformaReservas.Infraestructura.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsTotal", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -105,13 +115,16 @@ var app = builder.Build();
         app.UseSwaggerUI();
     }
 
-    app.UseHttpsRedirection();
+    //app.UseHttpsRedirection();
+
     app.UseStaticFiles(); 
+
+    
+    app.UseCors("CorsTotal");
 
     app.UseAuthentication();
     app.UseAuthorization();
 
-   
     app.UseAuthentication();
     app.UseAuthorization();
 
