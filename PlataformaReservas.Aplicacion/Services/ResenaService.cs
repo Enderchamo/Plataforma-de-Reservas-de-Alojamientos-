@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq;
 using FluentValidation;
 using PlataformaReservas.Aplicacion.DTOs;
 using PlataformaReservas.Aplicacion.Interfaces;
@@ -11,22 +12,20 @@ namespace PlataformaReservas.Aplicacion.Services;
 
 public class ResenaService : IResenaService
 {
-
     private readonly IResenaRepository _resenaRepository;
     private readonly IReservaRepository _reservaRepository;
     private readonly IValidator<CrearResenaDto> _validator;
-    
-    public ResenaService(IResenaRepository resenaRepository,IReservaRepository reservaRepository,IValidator<CrearResenaDto> validator)
+
+    public ResenaService(IResenaRepository resenaRepository, IReservaRepository reservaRepository, IValidator<CrearResenaDto> validator)
     {
-        _resenaRepository = resenaRepository;   
+        _resenaRepository = resenaRepository;
         _reservaRepository = reservaRepository;
         _validator = validator;
     }
 
-
     public async Task<Resena> CrearResenaAsync(CrearResenaDto resenaDTO, int usuarioId)
     {
-        var validacion =await _validator.ValidateAsync(resenaDTO);
+        var validacion = await _validator.ValidateAsync(resenaDTO);
         if (!validacion.IsValid)
         {
             throw new ValidationException(validacion.Errors);
@@ -63,5 +62,18 @@ public class ResenaService : IResenaService
     public async Task<IEnumerable<Resena>> ObtenerPorPropiedadAsync(int propiedadId)
     {
         return await _resenaRepository.ObtenerPorPropiedadIdAsync(propiedadId);
+    }
+
+    public async Task<ResumenResenasDto> ObtenerResumenPorPropiedadAsync(int propiedadId)
+    {
+        var resenas = await _resenaRepository.ObtenerPorPropiedadIdAsync(propiedadId);
+        double promedio = resenas.Any() ? resenas.Average(r => r.Calificacion) : 0;
+
+        return new ResumenResenasDto
+        {
+            PromedioCalificacion = Math.Round(promedio, 1),
+            TotalResenas = resenas.Count(),
+            Resenas = resenas
+        };
     }
 }

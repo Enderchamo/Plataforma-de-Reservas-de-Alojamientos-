@@ -1,4 +1,4 @@
-using System;
+using System.Threading.Tasks;
 using PlataformaReservas.Aplicacion.DTOs;
 using PlataformaReservas.Dominio.Entidades;
 
@@ -8,8 +8,8 @@ public interface IUsuarioService
 {
     Task<Usuario> RegistrarUsuarioAsync(RegistrarUsuarioDto dto);
     
-    Task<Usuario> LoginAsync(LoginUsuarioDto dto);
+    // Cambiamos Usuario por LoginResponseDto para que coincida con tu servicio
+    Task<LoginResponseDto> LoginAsync(LoginUsuarioDto dto);
 
     Task ConfirmarCuentaAsync(string email, string token);
-
 }
