@@ -11,6 +11,7 @@ using PlataformaReservas.Dominio.Entidades;
 using PlataformaReservas.Dominio.Repositorios;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using PlataformaReservas.Dominio.Excepciones;
 
 
 namespace PlataformaReservas.Aplicacion.Services;
@@ -38,7 +39,7 @@ public class UsuarioService : IUsuarioService
         if (!validacion.IsValid) throw new ValidationException(validacion.Errors);
 
         var existente = await _usuarioRepository.ObtenerPorEmailAsync(dto.Email);
-        if (existente != null) throw new InvalidOperationException("El correo ya está registrado.");
+        if (existente != null) throw new AppException("El correo ya está registrado.", 400, "ERROR_NEGOCIO");
 
         string passwordHasheada = BCrypt.Net.BCrypt.HashPassword(dto.Password);
         var nuevo = new Usuario(dto.Nombre, dto.Email, passwordHasheada, dto.EsHost, dto.EsGuest);
@@ -67,10 +68,10 @@ public class UsuarioService : IUsuarioService
         var usuario = await _usuarioRepository.ObtenerPorEmailAsync(dto.Email);
         
         if (usuario == null || !BCrypt.Net.BCrypt.Verify(dto.Password, usuario.Password))
-            throw new UnauthorizedAccessException("Credenciales incorrectas.");
+            throw new AppException("Credenciales incorrectas.", 400, "ERROR_NEGOCIO");
 
         if (!usuario.CuentaConfirmada)
-            throw new UnauthorizedAccessException("Debes confirmar tu cuenta por correo antes de entrar.");
+            throw new AppException("Debes confirmar tu cuenta por correo antes de entrar.", 400, "ERROR_NEGOCIO");
 
         // Generamos el Token aquí (Logica de negocio limpia)
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -105,7 +106,7 @@ public class UsuarioService : IUsuarioService
     public async Task ConfirmarCuentaAsync(string email, string token)
     {
         var usuario = await _usuarioRepository.ObtenerPorEmailAsync(email);
-        if (usuario == null) throw new InvalidOperationException("Usuario no encontrado.");
+        if (usuario == null) throw new AppException("Usuario no encontrado.", 400, "ERROR_NEGOCIO");
 
         usuario.ConfirmarCorreo(token);
         await _usuarioRepository.ActualizarAsync(usuario);

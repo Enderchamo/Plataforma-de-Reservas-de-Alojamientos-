@@ -8,7 +8,7 @@ public class CrearResenaDto{
 
     public int Calificacion{get; init ;}
 
-    public string Comentario{get; init ;}
+    public string Comentario{get; init ;}  = string.Empty;
     
 }
 

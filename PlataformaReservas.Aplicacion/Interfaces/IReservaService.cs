@@ -7,7 +7,7 @@ namespace PlataformaReservas.Aplicacion.Interfaces;
 public interface IReservaService
 {
     Task<Reserva> CrearReservaAsync(CrearReservaDto dto);
-    Task CancelarReservaAsync(int reservaId, int usuarioId);
-    Task CompletarReservaAsync(int reservaId, int usuarioId);
-    Task<IEnumerable<Reserva>> ObtenerReservasPorUsuarioAsync(int usuarioId);
+    Task CancelarReservaAsync(int reservaId);
+    Task CompletarReservaAsync(int reservaId);
+    Task<IEnumerable<Reserva>> ObtenerReservasPorUsuarioAsync();
 }

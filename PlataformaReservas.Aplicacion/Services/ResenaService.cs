@@ -7,6 +7,7 @@ using PlataformaReservas.Aplicacion.DTOs;
 using PlataformaReservas.Aplicacion.Interfaces;
 using PlataformaReservas.Dominio.Entidades;
 using PlataformaReservas.Dominio.Repositorios;
+using PlataformaReservas.Dominio.Excepciones;
 
 namespace PlataformaReservas.Aplicacion.Services;
 
@@ -15,16 +16,28 @@ public class ResenaService : IResenaService
     private readonly IResenaRepository _resenaRepository;
     private readonly IReservaRepository _reservaRepository;
     private readonly IValidator<CrearResenaDto> _validator;
+     private readonly IUserContext _userContext;
 
-    public ResenaService(IResenaRepository resenaRepository, IReservaRepository reservaRepository, IValidator<CrearResenaDto> validator)
+    public ResenaService(
+        IResenaRepository resenaRepository,
+        IReservaRepository reservaRepository,
+        IValidator<CrearResenaDto> validator,
+        IUserContext userContext)
     {
         _resenaRepository = resenaRepository;
         _reservaRepository = reservaRepository;
         _validator = validator;
+        _userContext = userContext;
     }
 
-    public async Task<Resena> CrearResenaAsync(CrearResenaDto resenaDTO, int usuarioId)
-    {
+
+
+    
+
+    public async Task<Resena> CrearResenaAsync(CrearResenaDto resenaDTO)
+    {       
+        var usuarioId = _userContext.UserId ?? throw new AppException("Sesión no válida.", 401, "NO_AUTORIZADO");
+
         var validacion = await _validator.ValidateAsync(resenaDTO);
         if (!validacion.IsValid)
         {
@@ -34,23 +47,23 @@ public class ResenaService : IResenaService
         var reserva = await _reservaRepository.ObtenerPorIdAsync(resenaDTO.ReservaId);
         if (reserva == null)
         {
-            throw new InvalidOperationException("La reserva no existe.");
+            throw new AppException("Reserva no encontrada.", 400, "ERROR_NEGOCIO");
         }
 
         if (reserva.UsuarioInvitadoId != usuarioId)
         {
-            throw new UnauthorizedAccessException("Solo el huésped de la reserva puede dejar una reseña.");
+            throw new AppException("Solo el huésped de la reserva puede dejar una reseña.", 403, "ACCESO_DENEGADO");
         }
 
         if (reserva.Estado != Reserva.EstadoEnum.Completada)
         {
-            throw new InvalidOperationException("Solo puedes dejar una reseña si la reserva está Completada.");
+            throw new AppException("La reserva debe estar completada para poder dejar una reseña.", 400, "ERROR_NEGOCIO");
         }
 
         bool yaTieneResena = await _resenaRepository.ExisteResenaPorReservaAsync(resenaDTO.ReservaId);
         if (yaTieneResena)
         {
-            throw new InvalidOperationException("Ya has dejado una reseña para esta reserva. ¡Gracias por tu opinión!");
+            throw new AppException("Ya has dejado una reseña para esta reserva.", 400, "ERROR_NEGOCIO");
         }
 
         var nuevaResena = new Resena(resenaDTO.ReservaId, resenaDTO.Calificacion, resenaDTO.Comentario);

@@ -10,7 +10,7 @@ public interface IPropiedadService
 {
     // Escritura: El ID del Host se obtiene del token internamente
     Task<Propiedad> CrearPropiedadAsync(CrearPropiedadDto dto);
-    Task ActualizarPropiedadAsync(int id, CrearPropiedadDto dto);
+    Task ActualizarPropiedadAsync(int id, ActualizarPropiedadDto dto);
     Task EliminarPropiedadAsync(int id);
     Task ActualizarImagenAsync(int id, string rutaImagen);
 

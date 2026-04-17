@@ -6,6 +6,6 @@ namespace PlataformaReservas.Aplicacion.Interfaces;
 
 public interface INotificacionService
 {
-    Task<IEnumerable<Notificacion>> ObtenerMisNotificacionesAsync(int usuarioId, bool? noLeidas = null);
-    Task MarcarComoLeidaAsync(int notificacionId, int usuarioId);
+    Task<IEnumerable<Notificacion>> ObtenerMisNotificacionesAsync(bool? noLeidas = null);
+    Task MarcarComoLeidaAsync(int notificacionId);
 }

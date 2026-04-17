@@ -5,6 +5,7 @@ using FluentValidation;
 using PlataformaReservas.Aplicacion.DTOs;
 using PlataformaReservas.Aplicacion.Interfaces;
 using PlataformaReservas.Dominio.Entidades;
+using PlataformaReservas.Dominio.Excepciones;
 using PlataformaReservas.Dominio.Repositorios;
 
 namespace PlataformaReservas.Aplicacion.Services;
@@ -27,15 +28,17 @@ public class PropiedadService : IPropiedadService
 
     public async Task<Propiedad> CrearPropiedadAsync(CrearPropiedadDto dto)
     {
-        // Forzamos el ID del Host desde el Token por seguridad
-        dto.HostId = _userContext.UserId ?? throw new UnauthorizedAccessException("Sesión no válida.");
+        // Extraemos el ID del Host desde el Token y lo asignamos
+        var hostId = _userContext.UserId ?? throw new AppException("Sesión no válida.", 401, "NO_AUTORIZADO");
+        dto.HostId = hostId;
 
         var validacion = await _crearPropiedadValidator.ValidateAsync(dto);
         if (!validacion.IsValid) throw new ValidationException(validacion.Errors);
-
+        
         if (await _propiedadRepository.ExistePropiedadPorTituloYHostAsync(dto.Titulo, dto.HostId))
         {
-            throw new InvalidOperationException($"Ya tienes una propiedad con el título '{dto.Titulo}'.");
+            // Cambiado a AppException
+            throw new AppException($"Ya tienes una propiedad con el título '{dto.Titulo}'.", 400, "TITULO_DUPLICADO");
         }
 
         var nuevaPropiedad = new Propiedad(dto.Titulo, dto.Descripcion, dto.Ubicacion, dto.PrecioPorNoche, dto.Capacidad, dto.HostId);
@@ -43,28 +46,28 @@ public class PropiedadService : IPropiedadService
         return nuevaPropiedad;
     }
 
-    public async Task ActualizarPropiedadAsync(int id, CrearPropiedadDto dto)
+    public async Task ActualizarPropiedadAsync(int id, ActualizarPropiedadDto dto)
     {
-        var propiedad = await ValidarYObtenerPropiedadPropia(id);
+        var hostId = _userContext.UserId ?? throw new AppException("Sesión no válida.", 401, "NO_AUTORIZADO");
+        
+        var propiedad = await _propiedadRepository.ObtenerPorIdAsync(id);
 
-        var validacion = await _crearPropiedadValidator.ValidateAsync(dto);
-        if (!validacion.IsValid) throw new ValidationException(validacion.Errors);
+        if (propiedad == null)
+            throw new AppException("La propiedad solicitada no existe.", 404, "PROPIEDAD_NO_ENCONTRADA");
+
+        if (propiedad.HostId != hostId)
+            throw new AppException("No tienes permiso para modificar esta propiedad.", 403, "ACCESO_DENEGADO");
 
         propiedad.ActualizarDetalles(dto.Titulo, dto.Descripcion, dto.Ubicacion, dto.PrecioPorNoche, dto.Capacidad);
         await _propiedadRepository.ActualizarAsync(propiedad);
     }
 
     public async Task ActualizarImagenAsync(int id, string rutaImagen)
-{
-    // 1. Obtenemos la propiedad y validamos permisos en un solo paso
-    var propiedad = await ValidarYObtenerPropiedadPropia(id);
-
-    // 2. CORRECCIÓN: El nombre de la variable es 'propiedad'
-    propiedad.ImagenUrl = rutaImagen;
-
-    // 3. Persistimos los cambios en la base de datos
-    await _propiedadRepository.ActualizarAsync(propiedad);
-}
+    {
+        var propiedad = await ValidarYObtenerPropiedadPropia(id);
+        propiedad.ImagenUrl = rutaImagen;
+        await _propiedadRepository.ActualizarAsync(propiedad);
+    }
 
     public async Task EliminarPropiedadAsync(int id)
     {
@@ -77,7 +80,7 @@ public class PropiedadService : IPropiedadService
     public async Task<IEnumerable<Propiedad>> BuscarPropiedadesAsync(string? ubicacion, decimal? precioMaximo, int? capacidadMinimas, DateTime? fechaEntrada, DateTime? fechaSalida)
     {
         if (fechaEntrada >= fechaSalida)
-            throw new ArgumentException("La fecha de entrada debe ser anterior a la de salida.");
+            throw new AppException("La fecha de entrada debe ser anterior a la de salida.", 400, "FECHAS_INVALIDAS");
 
         return await _propiedadRepository.BusquedaPorFiltroAsync(ubicacion, precioMaximo, capacidadMinimas, fechaEntrada, fechaSalida);
     }
@@ -87,14 +90,14 @@ public class PropiedadService : IPropiedadService
     // --- Helper Privado de Seguridad ---
     private async Task<Propiedad> ValidarYObtenerPropiedadPropia(int id)
     {
-        var usuarioId = _userContext.UserId ?? throw new UnauthorizedAccessException();
+        var usuarioId = _userContext.UserId ?? throw new AppException("Sesión no válida.", 401, "NO_AUTORIZADO");
         var propiedad = await _propiedadRepository.ObtenerPorIdAsync(id);
 
         if (propiedad == null) 
-            throw new KeyNotFoundException("La propiedad no existe.");
+            throw new AppException("Propiedad no encontrada.", 404, "NO_ENCONTRADA");
 
         if (propiedad.HostId != usuarioId)
-            throw new UnauthorizedAccessException("No tienes permisos sobre esta propiedad.");
+            throw new AppException("No tienes permisos sobre esta propiedad.", 403, "ACCESO_DENEGADO");
 
         return propiedad;
     }

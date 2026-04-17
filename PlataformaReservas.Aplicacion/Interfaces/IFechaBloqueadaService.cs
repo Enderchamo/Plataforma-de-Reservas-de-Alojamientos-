@@ -7,6 +7,6 @@ namespace PlataformaReservas.Aplicacion.Interfaces;
 
 public interface IFechaBloqueadaService
 {
-    Task<FechaBloqueada> BloquearFechaAsync(BloquearFechaDto dto, int hostId);
+    Task<FechaBloqueada> BloquearFechaAsync(BloquearFechaDto dto);
     Task<IEnumerable<FechaBloqueada>> ObtenerPorPropiedadAsync(int propiedadId);
 }
