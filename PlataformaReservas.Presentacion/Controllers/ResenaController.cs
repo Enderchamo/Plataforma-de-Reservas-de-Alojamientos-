@@ -24,14 +24,8 @@ namespace PlataformaReservas.Presentacion.Controllers
         public async Task<IActionResult> CrearResena([FromBody] CrearResenaDto dto)
         {
             
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-                if (!int.TryParse(userIdClaim, out int usuarioId)) 
-                {
-                    return Unauthorized();
-                }
-
-                var resena = await _resenaService.CrearResenaAsync(dto, usuarioId);
+                var resena = await _resenaService.CrearResenaAsync(dto);
 
                 return Created("", resena);
     

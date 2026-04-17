@@ -21,15 +21,9 @@ namespace PlataformaReservas.Presentacion
         [HttpPost]
         public async Task<IActionResult> BloquearFecha([FromBody] BloquearFechaDto dto)
         {
-            var hostIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (string.IsNullOrEmpty(hostIdClaim) || !int.TryParse(hostIdClaim, out int hostId))
-            {
-                return Unauthorized();
-            }
 
             // Ya no hay try/catch. Si esto falla, el Middleware lo atrapa en el aire.
-            var fechaBloqueada = await _fechaBloqueadaService.BloquearFechaAsync(dto, hostId);
+            var fechaBloqueada = await _fechaBloqueadaService.BloquearFechaAsync(dto);
 
             return Created("", fechaBloqueada);
         }

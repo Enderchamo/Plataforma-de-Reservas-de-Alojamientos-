@@ -23,27 +23,10 @@ namespace PlataformaReservas.Presentacion.Controllers
         public async Task<IActionResult> CrearReserva([FromBody] CrearReservaDto dto)
 
         {
-            
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                
-                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int guestId))
-                
-                {
-                    return Unauthorized(new { error = "No se pudo identificar al usuario." });
-                }
-
-                if (dto.UsuarioInvitadoId != guestId)
-                
-                {
-                    return StatusCode(403, new { error = "No puedes realizar una reserva a nombre de otro usuario." });
-                }
-
                 var reserva = await _reservaService.CrearReservaAsync(dto);
-                {
-                    return Created("", new { mensaje = "Reserva exitosa", id = reserva.Id });
-                }
-    
-
+                
+                return Created("", new { mensaje = "Reserva exitosa", id = reserva.Id });
+                
         }
 
 
@@ -53,15 +36,8 @@ namespace PlataformaReservas.Presentacion.Controllers
         public async Task<IActionResult> ObtenerMisReservas()
 
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (!int.TryParse(userIdClaim, out int guestId)) 
-
-            {
-                return Unauthorized();
-            }
-
-            var reservas = await _reservaService.ObtenerReservasPorUsuarioAsync(guestId);
+            var reservas = await _reservaService.ObtenerReservasPorUsuarioAsync();
             return Ok(reservas);
             
         }
@@ -70,14 +46,8 @@ namespace PlataformaReservas.Presentacion.Controllers
         [HttpPatch("{id}/cancelar")]
         public async Task<IActionResult> CancelarReserva(int id)
         {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                
-                if (!int.TryParse(userIdClaim, out int usuarioId))
-                {
-                    return Unauthorized();
-                }
 
-                await _reservaService.CancelarReservaAsync(id, usuarioId);
+                await _reservaService.CancelarReservaAsync(id);
 
                 return Ok(new {mensaje = "Reserva Cancelada exitosamente."});
         }
@@ -87,14 +57,9 @@ namespace PlataformaReservas.Presentacion.Controllers
         public async Task<IActionResult> CompletarReserva(int id)
         {
         
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                
-                if (!int.TryParse(userIdClaim, out int usuarioId)) 
-                {
-                    return Unauthorized();
-                }
 
-                await _reservaService.CompletarReservaAsync(id, usuarioId);
+
+                await _reservaService.CompletarReservaAsync(id);
 
                 return Ok(new { mensaje = "Reserva marcada como completada." });
         }
