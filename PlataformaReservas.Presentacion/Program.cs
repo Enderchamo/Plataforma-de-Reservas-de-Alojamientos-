@@ -43,6 +43,11 @@ builder.Services.AddScoped<IReservaService, ReservaService>();
 builder.Services.AddScoped<IResenaService, ResenaService>();
 builder.Services.AddScoped<IFechaBloqueadaService, FechaBloqueadaService>();
 builder.Services.AddScoped<INotificacionService, NotificacionService>();
+builder.Services.AddScoped<IUserContext, UserContext>();
+builder.Services.AddScoped<INotificacionFacade, NotificacionFacade>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IPhotoService, PhotoService>();
+
 
 // 4. Registro de los Validadores (FluentValidation) automáticamente
 builder.Services.AddValidatorsFromAssemblyContaining<CrearPropiedadDto>();
@@ -71,11 +76,10 @@ builder.Services.AddControllers()
     
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IPhotoService, PhotoService>();
-builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+
+
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<IUserContext, UserContext>();
+
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -130,10 +134,6 @@ var app = builder.Build();
     app.UseAuthentication();
     app.UseAuthorization();
 
-    app.UseAuthentication();
-    app.UseAuthorization();
-
-   
     app.MapControllers();
 
     app.Run();
