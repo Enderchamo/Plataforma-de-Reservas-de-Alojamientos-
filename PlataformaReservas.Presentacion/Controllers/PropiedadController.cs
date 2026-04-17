@@ -40,7 +40,7 @@ namespace PlataformaReservas.Presentacion.Controllers
         [HttpPost]
         public async Task<IActionResult> CrearPropiedad([FromBody] CrearPropiedadDto dto)
         {
-            int hostId = ObtenerIdUsuarioAutenticado();
+    
             
             // Pasamos el hostId al servicio para que valide si coincide con el del DTO
             var nuevaPropiedad = await _propiedadService.CrearPropiedadAsync(dto);
@@ -51,10 +51,10 @@ namespace PlataformaReservas.Presentacion.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> ActualizarPropiedad(int id, [FromBody] ActualizarPropiedadDto dto)
         {
-            int hostId = ObtenerIdUsuarioAutenticado();
+            
             
             // Pasamos el hostId al servicio para que evalúe si el usuario es el dueño
-            await _propiedadService.ActualizarPropiedadAsync(id, dto, hostId);
+            await _propiedadService.ActualizarPropiedadAsync(id, dto);
             return NoContent();
         }
 
@@ -62,7 +62,7 @@ namespace PlataformaReservas.Presentacion.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> EliminarPropiedad(int id)
         {
-            int hostId = ObtenerIdUsuarioAutenticado();
+            
             
             // Pasamos el hostId al servicio para proteger la eliminación
             await _propiedadService.EliminarPropiedadAsync(id);
@@ -88,18 +88,6 @@ namespace PlataformaReservas.Presentacion.Controllers
             });
         }
 
-        // --- MÉTODO PRIVADO PARA LIMPIAR LOS ENDPOINTS ---
-        private int ObtenerIdUsuarioAutenticado()
-        {
-            var hostIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (string.IsNullOrEmpty(hostIdClaim) || !int.TryParse(hostIdClaim, out int hostId))
-            {
-                // Si el token falla, el middleware devuelve un 401 automáticamente
-                throw new AppException("No se pudo identificar al usuario.", 401, "NO_AUTORIZADO");
-            }
-
-            return hostId;
-        }
+        
     }
 }
