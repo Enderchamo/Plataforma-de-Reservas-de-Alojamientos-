@@ -23,8 +23,7 @@ namespace PlataformaReservas.Presentacion.Controllers
         public async Task<IActionResult> CrearReserva([FromBody] CrearReservaDto dto)
 
         {
-            try
-            {
+            
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 
                 if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int guestId))
@@ -43,17 +42,7 @@ namespace PlataformaReservas.Presentacion.Controllers
                 {
                     return Created("", new { mensaje = "Reserva exitosa", id = reserva.Id });
                 }
-            }
-
-            catch (FluentValidation.ValidationException ex)
-            {       
-                return BadRequest(new { errores = ex.Errors.Select(e => e.ErrorMessage) });
-            }
-
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { error = ex.Message }); // Error 409 si hay choque de fechas (Concurrencia)
-            }
+    
 
         }
 
@@ -81,9 +70,6 @@ namespace PlataformaReservas.Presentacion.Controllers
         [HttpPatch("{id}/cancelar")]
         public async Task<IActionResult> CancelarReserva(int id)
         {
-            
-            try
-            {
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 
                 if (!int.TryParse(userIdClaim, out int usuarioId))
@@ -94,31 +80,13 @@ namespace PlataformaReservas.Presentacion.Controllers
                 await _reservaService.CancelarReservaAsync(id, usuarioId);
 
                 return Ok(new {mensaje = "Reserva Cancelada exitosamente."});
-
-            }
-
-            catch (InvalidOperationException ex)
-            {
-                
-                return BadRequest(new { error = ex.Message });
-            }
-
-            catch (UnauthorizedAccessException ex)
-            {
-                return StatusCode(403, new { error = ex.Message });
-            }
-
-            
-
-
         }
 
 
         [HttpPatch("{id}/completar")]
         public async Task<IActionResult> CompletarReserva(int id)
         {
-            try
-            {
+        
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 
                 if (!int.TryParse(userIdClaim, out int usuarioId)) 
@@ -129,14 +97,7 @@ namespace PlataformaReservas.Presentacion.Controllers
                 await _reservaService.CompletarReservaAsync(id, usuarioId);
 
                 return Ok(new { mensaje = "Reserva marcada como completada." });
-            }
-            
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
         }
-
 
     }
 }

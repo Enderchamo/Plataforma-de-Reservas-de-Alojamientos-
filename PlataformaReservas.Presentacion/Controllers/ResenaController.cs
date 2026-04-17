@@ -23,8 +23,7 @@ namespace PlataformaReservas.Presentacion.Controllers
         [HttpPost]
         public async Task<IActionResult> CrearResena([FromBody] CrearResenaDto dto)
         {
-            try
-            {
+            
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
                 if (!int.TryParse(userIdClaim, out int usuarioId)) 
@@ -35,19 +34,7 @@ namespace PlataformaReservas.Presentacion.Controllers
                 var resena = await _resenaService.CrearResenaAsync(dto, usuarioId);
 
                 return Created("", resena);
-            }
-            catch (FluentValidation.ValidationException ex)
-            {
-                return BadRequest(new { errores = ex.Errors.Select(e => e.ErrorMessage) });
-            }
-            catch (System.InvalidOperationException ex)
-            {
-                return Conflict(new { error = ex.Message });
-            }
-            catch (System.UnauthorizedAccessException ex)
-            {
-                return StatusCode(403, new { error = ex.Message });
-            }
+    
         }
         
         [HttpGet("propiedad/{propiedadId}")]

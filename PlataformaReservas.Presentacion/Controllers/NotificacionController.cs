@@ -38,8 +38,7 @@ namespace PlataformaReservas.Presentacion.Controllers
         [HttpPatch("{id}/leer")]
         public async Task<IActionResult> MarcarComoLeida(int id)
         {
-            try
-            {
+            
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
                 if (!int.TryParse(userIdClaim, out int usuarioId)) 
@@ -50,12 +49,7 @@ namespace PlataformaReservas.Presentacion.Controllers
                 await _notificacionService.MarcarComoLeidaAsync(id, usuarioId);
 
                 return Ok(new { mensaje = "Notificación marcada como leída." });
-            }
-
-            catch (InvalidOperationException ex)
-            {
-                return NotFound(new { error = ex.Message });
-            }
+            
         }
     }
 }

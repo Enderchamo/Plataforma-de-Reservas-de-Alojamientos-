@@ -24,9 +24,7 @@ namespace PlataformaReservas.Presentacion.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> ObtenerPropiedadPorId(int id)
         {
-            try
-            {
-                
+            
                 var propiedad = await _propiedadService.ObtenerPorIdAsync(id);
                 
                 if (propiedad == null)
@@ -35,27 +33,17 @@ namespace PlataformaReservas.Presentacion.Controllers
                 }
 
                 return Ok(propiedad);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = "Ocurrió un error interno en el servidor." });
-            }
+            
         }
 
 
         [HttpGet("Buscar")]
         public async Task<IActionResult> BuscarPropiedades([FromQuery] string? ubicacion, [FromQuery] decimal? precioMaximo, [FromQuery] int? capacidadMinimas,[FromQuery]DateTime? fechaEntrada, [FromQuery]DateTime? fechaSalida)
         {
-            try
-            {
+            
                 var propiedades= await _propiedadService.BuscarPropiedadesAsync(ubicacion,precioMaximo,capacidadMinimas,fechaEntrada,fechaSalida);
                 return Ok(propiedades);
-            }
-            catch (ArgumentException ex)
-            {
-                
-                return BadRequest(new { error = ex.Message });
-            }
+            
         }
 
 
@@ -64,8 +52,7 @@ namespace PlataformaReservas.Presentacion.Controllers
         public async Task<IActionResult> CrearPropiedad([FromBody] CrearPropiedadDto dto)
         {
             
-            try
-            {
+        
                 var hostIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
                 if (string.IsNullOrEmpty(hostIdClaim ) || !int.TryParse(hostIdClaim,out int hostId))
@@ -80,22 +67,7 @@ namespace PlataformaReservas.Presentacion.Controllers
 
                 var nuevaPropiedad = await _propiedadService.CrearPropiedadAsync(dto);
                 return Created("",nuevaPropiedad);
-            }
-
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { error = ex.Message });
-            }
-
-            catch (FluentValidation.ValidationException ex)
-            {
-                return BadRequest(new { errores = ex.Errors.Select(e => e.ErrorMessage) });
-            }
-
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = "Ocurrió un error interno en el servidor." });
-            }
+            
 
         }
 
@@ -106,8 +78,7 @@ namespace PlataformaReservas.Presentacion.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> ActualizarPropiedad(int id, [FromBody] CrearPropiedadDto dto)
         {
-            try
-            {
+
                 var hostIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 
                 if (string.IsNullOrEmpty(hostIdClaim) || !int.TryParse(hostIdClaim, out int hostId))  
@@ -117,22 +88,7 @@ namespace PlataformaReservas.Presentacion.Controllers
 
                 await _propiedadService.ActualizarPropiedadAsync(id, dto);
                 return NoContent();
-            }
-            catch (FluentValidation.ValidationException ex)
-            {
-                
-                return BadRequest(new { errores = ex.Errors.Select(e => e.ErrorMessage) });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return NotFound(new { error = ex.Message });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return StatusCode(403, new { error = ex.Message }); 
-            }
-
-
+        
         }
 
 
@@ -155,8 +111,6 @@ namespace PlataformaReservas.Presentacion.Controllers
                 return BadRequest(new { error = "Por favor, selecciona una imagen para subir." });
             }
 
-            try
-            {
                 // 2. Guardamos el archivo físico (Aquí usamos el PhotoService)
                 string rutaImagen = await _photoService.GuardarFotoPropiedadAsync(imagen);
 
@@ -168,19 +122,7 @@ namespace PlataformaReservas.Presentacion.Controllers
                     mensaje = "Imagen subida exitosamente",
                     url = rutaImagen 
                 });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { error = ex.Message });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return StatusCode(403, new { error = ex.Message });
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, new { error = "Ocurrió un error al subir la imagen." });
-            }
+
         }
     }
 }

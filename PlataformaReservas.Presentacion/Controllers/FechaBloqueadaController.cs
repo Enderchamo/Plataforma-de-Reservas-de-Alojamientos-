@@ -19,48 +19,19 @@ namespace PlataformaReservas.Presentacion
 
         [Authorize(Roles = "Host")]
         [HttpPost]
-
         public async Task<IActionResult> BloquearFecha([FromBody] BloquearFechaDto dto)
         {
-            try
+            var hostIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(hostIdClaim) || !int.TryParse(hostIdClaim, out int hostId))
             {
-                var hostIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                if (string.IsNullOrEmpty(hostIdClaim) || !int.TryParse(hostIdClaim, out int hostId))
-
-                {
-                    return Unauthorized();
-                }
-
-                var fechaBloqueada = await _fechaBloqueadaService.BloquearFechaAsync(dto, hostId);
-
-                return Created("", fechaBloqueada);
+                return Unauthorized();
             }
 
-            catch (FluentValidation.ValidationException ex)
+            // Ya no hay try/catch. Si esto falla, el Middleware lo atrapa en el aire.
+            var fechaBloqueada = await _fechaBloqueadaService.BloquearFechaAsync(dto, hostId);
 
-            {
-                return BadRequest(new { errores = ex.Errors.Select(e => e.ErrorMessage) });
-            }
-
-            catch (InvalidOperationException ex)
-
-            {
-                return NotFound(new { error = ex.Message });
-            }
-
-            catch (UnauthorizedAccessException ex)
-
-            {
-                return StatusCode(403, new { error = ex.Message });
-            }
-
-            catch (ArgumentException ex) 
-
-            {
-                return BadRequest(new { error = ex.Message });
-            }
-
+            return Created("", fechaBloqueada);
         }
 
         [HttpGet("propiedad/{propiedadId}")] 
@@ -68,9 +39,7 @@ namespace PlataformaReservas.Presentacion
         public async Task<IActionResult> ObtenerFechasBloqueadas(int propiedadId)
         {
             var fechas = await _fechaBloqueadaService.ObtenerPorPropiedadAsync(propiedadId);
-
             return Ok(fechas);
         }
-
     }
 }

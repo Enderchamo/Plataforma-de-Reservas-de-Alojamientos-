@@ -11,6 +11,7 @@ using PlataformaReservas.Dominio.Repositorios;
 using PlataformaReservas.Infraestructura.Persistencia;
 using PlataformaReservas.Infraestructura.Repositorios;
 using PlataformaReservas.Infraestructura.Services;
+using PlataformaReservas.Presentacion.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -111,6 +112,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+    app.UseMiddleware<ExceptionMiddleware>();
   
     if (app.Environment.IsDevelopment())
     {
