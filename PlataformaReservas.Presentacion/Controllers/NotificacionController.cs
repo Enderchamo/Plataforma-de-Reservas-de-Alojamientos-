@@ -1,9 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using PlataformaReservas.Aplicacion.DTOs;
 using PlataformaReservas.Aplicacion.Interfaces;
-using System.Security.Claims;
 
 namespace PlataformaReservas.Presentacion.Controllers
 {
@@ -12,8 +9,7 @@ namespace PlataformaReservas.Presentacion.Controllers
     [Authorize]
     public class NotificacionController : ControllerBase
     {
-        public readonly INotificacionService _notificacionService;
-
+        private readonly INotificacionService _notificacionService;
 
         public NotificacionController(INotificacionService notificacionService)
         {
@@ -23,33 +19,17 @@ namespace PlataformaReservas.Presentacion.Controllers
         [HttpGet]
         public async Task<IActionResult> ObtenerMisNotificaciones([FromQuery] bool? noLeidas)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (!int.TryParse(userIdClaim, out int usuarioId))
-            {
-                return Unauthorized();
-            }
-
-            var notificaciones = await _notificacionService.ObtenerMisNotificacionesAsync(usuarioId, noLeidas);
-            
+            // El servicio (gracias a IUserContext) ya sabe quién es el usuario
+            var notificaciones = await _notificacionService.ObtenerMisNotificacionesAsync(noLeidas);
             return Ok(notificaciones);
         }
 
         [HttpPatch("{id}/leer")]
         public async Task<IActionResult> MarcarComoLeida(int id)
         {
-            
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                if (!int.TryParse(userIdClaim, out int usuarioId)) 
-                {
-                    return Unauthorized();
-                }
-
-                await _notificacionService.MarcarComoLeidaAsync(id, usuarioId);
-
-                return Ok(new { mensaje = "Notificación marcada como leída." });
-            
+            // Toda la validación de si la notificación le pertenece al usuario ocurre en el servicio
+            await _notificacionService.MarcarComoLeidaAsync(id);
+            return Ok(new { mensaje = "Notificación marcada como leída." });
         }
     }
 }
