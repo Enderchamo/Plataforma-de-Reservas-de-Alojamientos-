@@ -76,19 +76,17 @@ namespace PlataformaReservas.Presentacion.Controllers
 
         [Authorize(Roles = "Host")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> ActualizarPropiedad(int id, [FromBody] CrearPropiedadDto dto)
+        public async Task<IActionResult> ActualizarPropiedad(int id, [FromBody] ActualizarPropiedadDto dto)
         {
+            // 1. Extraer quién hace la petición
+            var hostIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(hostIdClaim, out int hostId)) return Unauthorized();
 
-                var hostIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                
-                if (string.IsNullOrEmpty(hostIdClaim) || !int.TryParse(hostIdClaim, out int hostId))  
-                {
-                    return Unauthorized();
-                }
+            // 2. Delegar TODO el trabajo y validación al servicio
+            await _propiedadService.ActualizarPropiedadAsync(id, dto, hostId);
 
-                await _propiedadService.ActualizarPropiedadAsync(id, dto);
-                return NoContent();
-        
+            // 3. Retornar éxito
+            return NoContent();
         }
 
 
