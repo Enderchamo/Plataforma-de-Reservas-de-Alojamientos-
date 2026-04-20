@@ -24,16 +24,17 @@ namespace PlataformaReservas.Presentacion.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> ObtenerPropiedadPorId(int id)
         {
-            // La validación de si es null se movió al Servicio
-            var propiedad = await _propiedadService.ObtenerPorIdAsync(id);
-            return Ok(propiedad);
+            var dto = await _propiedadService.ObtenerPorIdAsync(id);
+            if (dto == null) return NotFound(new { mensaje = "Propiedad no encontrada" });
+            
+            return Ok(dto);
         }
 
         [HttpGet("Buscar")]
         public async Task<IActionResult> BuscarPropiedades([FromQuery] string? ubicacion, [FromQuery] decimal? precioMaximo, [FromQuery] int? capacidadMinimas, [FromQuery] DateTime? fechaEntrada, [FromQuery] DateTime? fechaSalida)
         {
-            var propiedades = await _propiedadService.BuscarPropiedadesAsync(ubicacion, precioMaximo, capacidadMinimas, fechaEntrada, fechaSalida);
-            return Ok(propiedades);
+            var resultados = await _propiedadService.BuscarPropiedadesAsync(ubicacion, precioMaximo, capacidadMinimas, fechaEntrada, fechaSalida);
+            return Ok(resultados);
         }
 
         [Authorize(Roles = "Host")]
