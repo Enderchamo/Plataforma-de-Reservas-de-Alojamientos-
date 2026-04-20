@@ -15,6 +15,6 @@ public interface IPropiedadService
     Task ActualizarImagenAsync(int id, string rutaImagen);
 
     // Lectura
-    Task<IEnumerable<Propiedad>> BuscarPropiedadesAsync(string? ubicacion, decimal? precioMaximo, int? capacidadMinimas, DateTime? fechaEntrada, DateTime? fechaSalida);
-    Task<Propiedad?> ObtenerPorIdAsync(int id);
+    Task<IEnumerable<PropiedadListaDto>> BuscarPropiedadesAsync(string? ubicacion, decimal? precioMaximo, int? capacidadMinimas, DateTime? fechaEntrada, DateTime? fechaSalida);
+    Task<PropiedadDetalleDto?> ObtenerPorIdAsync(int id);
 }

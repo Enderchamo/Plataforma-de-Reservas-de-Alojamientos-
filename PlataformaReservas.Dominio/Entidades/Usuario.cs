@@ -70,6 +70,18 @@ public class Usuario
     }
     
 
+    public void ActualizarRoles(bool esHost, bool esGuest)
+    {
+    
+        if (!esHost && !esGuest)
+        {
+            throw new ArgumentException("El usuario debe tener al menos un rol asignado (Host o Guest).");
+        }
+
+        EsHost = esHost;
+        EsGuest = esGuest;
+    }
+
 }
 
 

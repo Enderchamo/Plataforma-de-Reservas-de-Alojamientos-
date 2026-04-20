@@ -15,4 +15,6 @@ public interface IReservaRepository
         Task<bool> VerificarDisponibilidadAsync(int propiedadId, DateTime fechaEntrada, DateTime fechaSalida);
 
         Task<IEnumerable<Reserva>> ObtenerPorUsuarioIdAsync(int usuarioId);
+
+        Task<IEnumerable<Reserva>> ObtenerReservasPorHostIdAsync(int hostId);
 }

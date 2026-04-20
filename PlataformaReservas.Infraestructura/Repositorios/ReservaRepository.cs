@@ -94,4 +94,18 @@ public class ReservaRepository : IReservaRepository
         }
     }
 
+    public async Task<IEnumerable<Reserva>> ObtenerReservasPorHostIdAsync(int hostId)
+    {
+        return await _context.Reservas
+        // Incluimos la Propiedad para poder filtrar por su HostId y ver sus datos
+        .Include(r => r.Propiedad)
+        // Incluimos al UsuarioInvitado para que el Host sepa quién le reservó
+        .Include(r => r.UsuarioInvitado) 
+        // Filtramos: Solo las reservas donde el dueño de la propiedad sea el Host actual
+        .Where(r => r.Propiedad.HostId == hostId)
+        // Ordenamos para que las reservas más recientes (por fecha de entrada) salgan primero
+        .OrderByDescending(r => r.FechaEntrada)
+        .ToListAsync();
+    }
+
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlataformaReservas.Infraestructura.Persistencia;
 
@@ -11,9 +12,11 @@ using PlataformaReservas.Infraestructura.Persistencia;
 namespace PlataformaReservas.Infraestructura.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260420071435_ActualizarRelacionesReserva")]
+    partial class ActualizarRelacionesReserva
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -106,6 +109,9 @@ namespace PlataformaReservas.Infraestructura.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("UsuarioId")
+                        .HasColumnType("int");
+
                     b.Property<byte[]>("Version")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
@@ -113,7 +119,7 @@ namespace PlataformaReservas.Infraestructura.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("HostId");
+                    b.HasIndex("UsuarioId");
 
                     b.ToTable("Propiedades");
                 });
@@ -226,13 +232,9 @@ namespace PlataformaReservas.Infraestructura.Migrations
 
             modelBuilder.Entity("PlataformaReservas.Dominio.Entidades.Propiedad", b =>
                 {
-                    b.HasOne("PlataformaReservas.Dominio.Entidades.Usuario", "Host")
+                    b.HasOne("PlataformaReservas.Dominio.Entidades.Usuario", null)
                         .WithMany("Propiedades")
-                        .HasForeignKey("HostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Host");
+                        .HasForeignKey("UsuarioId");
                 });
 
             modelBuilder.Entity("PlataformaReservas.Dominio.Entidades.Reserva", b =>
@@ -240,13 +242,13 @@ namespace PlataformaReservas.Infraestructura.Migrations
                     b.HasOne("PlataformaReservas.Dominio.Entidades.Propiedad", "Propiedad")
                         .WithMany()
                         .HasForeignKey("PropiedadId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("PlataformaReservas.Dominio.Entidades.Usuario", "UsuarioInvitado")
                         .WithMany("Reservas")
                         .HasForeignKey("UsuarioInvitadoId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Propiedad");

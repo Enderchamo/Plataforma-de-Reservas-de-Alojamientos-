@@ -12,4 +12,6 @@ public interface IUsuarioService
     Task<LoginResponseDto> LoginAsync(LoginUsuarioDto dto);
 
     Task ConfirmarCuentaAsync(string email, string token);
+
+    Task ActualizarRolesAsync( ActualizarRolDto dto);
 }

@@ -17,7 +17,9 @@ public class PropiedadRepository : IPropiedadRepository
 
     public async Task<Propiedad?> ObtenerPorIdAsync(int id)
     {
-        return await _context.Propiedades.FindAsync(id);
+        return await _context.Propiedades
+                    .Include(p => p.Host) 
+                    .FirstOrDefaultAsync(p => p.Id == id);
     }
 
     public async Task AgregarAsync(Propiedad propiedad)
@@ -51,7 +53,11 @@ public class PropiedadRepository : IPropiedadRepository
 
         if (!string.IsNullOrWhiteSpace(ubicacion))
         {
-            query = query.Where(p => p.Ubicacion.Contains(ubicacion));
+    
+        var ubicacionLimpia = ubicacion.Trim(); 
+        
+
+        query = query.Where(p => EF.Functions.Like(p.Ubicacion, $"%{ubicacionLimpia}%"));
         }
 
         if (precioPorNoche.HasValue)

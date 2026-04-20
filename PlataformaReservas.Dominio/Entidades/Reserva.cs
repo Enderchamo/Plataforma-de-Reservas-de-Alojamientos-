@@ -9,6 +9,9 @@ public class Reserva
     public DateTime FechaEntrada { get; private set; }
     public DateTime FechaSalida { get; private set; }
 
+    public Propiedad Propiedad { get; private set; } = null!;
+    public Usuario UsuarioInvitado { get; private set; } = null!;
+
     public enum EstadoEnum
     {
         Confirmada, Cancelada, Completada

@@ -10,4 +10,5 @@ public interface IReservaService
     Task CancelarReservaAsync(int reservaId);
     Task CompletarReservaAsync(int reservaId);
     Task<IEnumerable<Reserva>> ObtenerReservasPorUsuarioAsync();
+    Task<IEnumerable<ReservaRecibidaDto>> ObtenerReservasRecibidasAsync();
 }

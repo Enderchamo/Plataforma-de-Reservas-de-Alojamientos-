@@ -46,6 +46,19 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Reserva>()
             .Property(x=>x.Estado)
             .HasConversion<string>();
+
+        modelBuilder.Entity<Reserva>()
+            .HasOne(r => r.Propiedad)
+            .WithMany() // Usamos WithMany vacío ya que Propiedad no tiene colección de Reservas
+            .HasForeignKey(r => r.PropiedadId)
+            .OnDelete(DeleteBehavior.Restrict); 
+
+        modelBuilder.Entity<Reserva>()
+            .HasOne(r => r.UsuarioInvitado)
+            .WithMany(u => u.Reservas) // Usamos la colección existente en Usuario
+            .HasForeignKey(r => r.UsuarioInvitadoId)
+            .OnDelete(DeleteBehavior.NoAction);   
+
     }
 
 }

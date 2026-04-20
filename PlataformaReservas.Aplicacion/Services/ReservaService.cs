@@ -80,6 +80,30 @@ public class ReservaService : IReservaService
         }
     }
 
+    public async Task<IEnumerable<ReservaRecibidaDto>> ObtenerReservasRecibidasAsync()
+    {
+        var hostId = _userContext.UserId ?? throw new AppException("Sesión no válida.", 401, "NO_AUTORIZADO");
+        
+        // 1. Obtenemos las entidades con sus Includes desde el Repositorio
+        var reservas = await _reservaRepository.ObtenerReservasPorHostIdAsync(hostId);
+
+        // 2. Las transformamos en DTOs manualmente
+        var dtos = reservas.Select(r => new ReservaRecibidaDto
+        {
+            Id = r.Id,
+            FechaEntrada = r.FechaEntrada,
+            FechaSalida = r.FechaSalida,
+            Estado = r.Estado.ToString(),
+            PropiedadId = r.PropiedadId,
+            PropiedadTitulo = r.Propiedad.Titulo,
+            HuespedId = r.UsuarioInvitadoId,
+            HuespedNombre = r.UsuarioInvitado.Nombre,
+            HuespedEmail = r.UsuarioInvitado.Email
+        });
+
+        return dtos;
+    }
+
     public async Task<Reserva> CrearReservaAsync(CrearReservaDto dto)
     {
         var validacion = await _crearReservaValidator.ValidateAsync(dto);

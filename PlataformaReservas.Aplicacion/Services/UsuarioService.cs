@@ -24,9 +24,12 @@ public class UsuarioService : IUsuarioService
     private readonly IValidator<LoginUsuarioDto> _loginValidator;
     private readonly IConfiguration _config;
 
-    public UsuarioService(IUsuarioRepository usuarioRepository, IEmailService emailService, IValidator<RegistrarUsuarioDto> registrarValidator, IValidator<LoginUsuarioDto> loginValidator, IConfiguration config)
+      private readonly IUserContext _userContext;
+
+    public UsuarioService(IUsuarioRepository usuarioRepository, IUserContext userContext, IEmailService emailService, IValidator<RegistrarUsuarioDto> registrarValidator, IValidator<LoginUsuarioDto> loginValidator, IConfiguration config)
     {
         _usuarioRepository = usuarioRepository;
+        _userContext = userContext;
         _emailService = emailService;
         _registrarValidator = registrarValidator;
         _loginValidator = loginValidator;
@@ -90,7 +93,7 @@ public class UsuarioService : IUsuarioService
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddHours(1), 
+            Expires = DateTime.UtcNow.AddHours(24), 
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
         
@@ -109,6 +112,25 @@ public class UsuarioService : IUsuarioService
         if (usuario == null) throw new AppException("Usuario no encontrado.", 400, "ERROR_NEGOCIO");
 
         usuario.ConfirmarCorreo(token);
+        await _usuarioRepository.ActualizarAsync(usuario);
+    }
+
+    public async Task ActualizarRolesAsync(ActualizarRolDto dto)
+    {
+        var usuarioId = _userContext.UserId ?? throw new AppException("Sesión no válida.", 401, "NO_AUTORIZADO");
+        // Asumimos que tienes un ObtenerPorIdAsync en tu IUsuarioRepository. 
+        // Si no lo tienes, deberás agregarlo igual que tienes ObtenerPorEmailAsync.
+        var usuario = await _usuarioRepository.ObtenerPorIdAsync(usuarioId);
+        
+        if (usuario == null) 
+            throw new AppException("Usuario no encontrado.", 404, "ERROR_NEGOCIO");
+
+    
+        // Actualizamos las propiedades. 
+        // Nota: Si tus propiedades tienen el 'set' privado en la entidad Usuario, 
+        // tendrás que crear un método en la entidad (ej: usuario.ActualizarRoles(dto.EsHost, dto.EsGuest))
+        usuario.ActualizarRoles(dto.EsHost, dto.EsGuest);
+
         await _usuarioRepository.ActualizarAsync(usuario);
     }
 }

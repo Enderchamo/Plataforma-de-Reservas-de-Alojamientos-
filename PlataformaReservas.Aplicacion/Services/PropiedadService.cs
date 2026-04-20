@@ -14,21 +14,26 @@ public class PropiedadService : IPropiedadService
 {
     private readonly IPropiedadRepository _propiedadRepository;
     private readonly IValidator<CrearPropiedadDto> _crearPropiedadValidator;
+    // 1. Declaramos el nuevo validador
+    private readonly IValidator<ActualizarPropiedadDto> _actualizarPropiedadValidator; 
     private readonly IUserContext _userContext;
 
     public PropiedadService(
         IPropiedadRepository propiedadRepository, 
         IValidator<CrearPropiedadDto> crearPropiedadValidator,
+        // 2. Lo inyectamos por el constructor
+        IValidator<ActualizarPropiedadDto> actualizarPropiedadValidator, 
         IUserContext userContext)
     {
         _propiedadRepository = propiedadRepository;
         _crearPropiedadValidator = crearPropiedadValidator;
+        // 3. Lo asignamos a la variable privada
+        _actualizarPropiedadValidator = actualizarPropiedadValidator; 
         _userContext = userContext;
     }
 
     public async Task<Propiedad> CrearPropiedadAsync(CrearPropiedadDto dto)
     {
-        // Extraemos el ID del Host desde el Token y lo asignamos
         var hostId = _userContext.UserId ?? throw new AppException("Sesión no válida.", 401, "NO_AUTORIZADO");
         dto.HostId = hostId;
 
@@ -37,7 +42,6 @@ public class PropiedadService : IPropiedadService
         
         if (await _propiedadRepository.ExistePropiedadPorTituloYHostAsync(dto.Titulo, dto.HostId))
         {
-            // Cambiado a AppException
             throw new AppException($"Ya tienes una propiedad con el título '{dto.Titulo}'.", 400, "TITULO_DUPLICADO");
         }
 
@@ -48,6 +52,10 @@ public class PropiedadService : IPropiedadService
 
     public async Task ActualizarPropiedadAsync(int id, ActualizarPropiedadDto dto)
     {
+        // 4. Ejecutamos la validación antes de hacer cualquier consulta a la base de datos
+        var validacion = await _actualizarPropiedadValidator.ValidateAsync(dto);
+        if (!validacion.IsValid) throw new ValidationException(validacion.Errors);
+
         var hostId = _userContext.UserId ?? throw new AppException("Sesión no válida.", 401, "NO_AUTORIZADO");
         
         var propiedad = await _propiedadRepository.ObtenerPorIdAsync(id);
@@ -77,15 +85,43 @@ public class PropiedadService : IPropiedadService
 
     // --- Métodos de Lectura ---
 
-    public async Task<IEnumerable<Propiedad>> BuscarPropiedadesAsync(string? ubicacion, decimal? precioMaximo, int? capacidadMinimas, DateTime? fechaEntrada, DateTime? fechaSalida)
+    public async Task<IEnumerable<PropiedadListaDto>> BuscarPropiedadesAsync(string? ubicacion, decimal? precioMaximo, int? capacidadMinimas, DateTime? fechaEntrada, DateTime? fechaSalida)
     {
         if (fechaEntrada >= fechaSalida)
             throw new AppException("La fecha de entrada debe ser anterior a la de salida.", 400, "FECHAS_INVALIDAS");
 
-        return await _propiedadRepository.BusquedaPorFiltroAsync(ubicacion, precioMaximo, capacidadMinimas, fechaEntrada, fechaSalida);
+        var propiedades = await _propiedadRepository.BusquedaPorFiltroAsync(ubicacion, precioMaximo, capacidadMinimas, fechaEntrada, fechaSalida);
+
+        return propiedades.Select(p => new PropiedadListaDto
+        {
+            Id = p.Id,
+            Titulo = p.Titulo,
+            PrecioPorNoche = p.PrecioPorNoche,
+            Ubicacion = p.Ubicacion,
+            ImagenUrl = p.ImagenUrl,
+            Capacidad = p.Capacidad
+        });
     }
 
-    public async Task<Propiedad?> ObtenerPorIdAsync(int id) => await _propiedadRepository.ObtenerPorIdAsync(id);
+    public async Task<PropiedadDetalleDto?> ObtenerPorIdAsync(int id)
+    {
+        var propiedad = await _propiedadRepository.ObtenerPorIdAsync(id);
+        
+        if (propiedad == null) return null;
+
+        return new PropiedadDetalleDto
+        {
+            Id = propiedad.Id,
+            Titulo = propiedad.Titulo,
+            Descripcion = propiedad.Descripcion,
+            Ubicacion = propiedad.Ubicacion,
+            PrecioPorNoche = propiedad.PrecioPorNoche,
+            Capacidad = propiedad.Capacidad,
+            ImagenUrl = propiedad.ImagenUrl,
+            HostId = propiedad.HostId,
+            NombreHost = propiedad.Host.Nombre
+        };
+    }
 
     // --- Helper Privado de Seguridad ---
     private async Task<Propiedad> ValidarYObtenerPropiedadPropia(int id)

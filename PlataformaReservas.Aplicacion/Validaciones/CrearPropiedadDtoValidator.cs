@@ -17,12 +17,12 @@ public class CrearPropiedadDtoValidator : AbstractValidator<CrearPropiedadDto>
 
         RuleFor(x=> x.Ubicacion)
             .NotEmpty().WithMessage("La ubicacion no puede estar vacia")
-            .MinimumLength(10).WithMessage("La ubicacion debe tener al menos 10 caracteres");
+            .MinimumLength(3).WithMessage("La ubicacion debe tener al menos 3 caracteres");
 
         
         RuleFor(x=> x.Descripcion)
             .NotEmpty().WithMessage("La descripcion no puede estar vacia")
-            .MinimumLength(20).WithMessage("La descripcion debe tener al menos 20 caracteres");
+            .MinimumLength(15).WithMessage("La descripcion debe tener al menos 15 caracteres");
 
         RuleFor(x=> x.Capacidad)
             .GreaterThan(0).WithMessage("La capacidad debe ser mayor a 0");
