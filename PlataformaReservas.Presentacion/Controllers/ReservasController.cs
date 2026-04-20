@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlataformaReservas.Aplicacion.DTOs;
@@ -42,6 +43,16 @@ namespace PlataformaReservas.Presentacion.Controllers
             
         }
 
+        [Authorize(Roles = "Host")]
+        [HttpGet("recibidas")]
+        public async Task<IActionResult> ObtenerReservasRecibidas()
+        {
+            // El servicio ahora nos devuelve directamente los DTOs limpios
+            var reservasDtos = await _reservaService.ObtenerReservasRecibidasAsync();
+            
+            return Ok(reservasDtos);
+        }
+
 
         [HttpPatch("{id}/cancelar")]
         public async Task<IActionResult> CancelarReserva(int id)
@@ -65,4 +76,6 @@ namespace PlataformaReservas.Presentacion.Controllers
         }
 
     }
+
+    
 }
