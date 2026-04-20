@@ -19,7 +19,7 @@ namespace PlataformaReservas.Presentacion.Controllers
             _resenaService = resenaService;
         }
 
-        [Authorize(Roles = "Guest")] 
+        [Authorize(Roles = "Guest,Host")] 
         [HttpPost]
         public async Task<IActionResult> CrearResena([FromBody] CrearResenaDto dto)
         {
