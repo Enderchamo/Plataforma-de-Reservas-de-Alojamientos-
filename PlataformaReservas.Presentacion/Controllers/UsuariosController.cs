@@ -7,6 +7,8 @@ using Microsoft.IdentityModel.Tokens;
 using PlataformaReservas.Aplicacion.DTOs;
 using PlataformaReservas.Aplicacion.Interfaces;
 using PlataformaReservas.Dominio.Entidades;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace PlataformaReservas.Presentacion.Controllers
 {
@@ -57,6 +59,20 @@ namespace PlataformaReservas.Presentacion.Controllers
                 var respuesta = await _usuarioService.LoginAsync(dto);
                 return Ok(respuesta); 
             
+        }
+
+        [Authorize] // Imprescindible para que el _userContext funcione
+        [HttpPut("roles")]
+        public async Task<IActionResult> ActualizarRoles([FromBody] ActualizarRolDto dto)
+        {
+            // Ya no pasamos el ID, el servicio se encarga de saber quién es el usuario logueado
+            await _usuarioService.ActualizarRolesAsync(dto);
+            
+            return Ok(new { 
+                mensaje = "Roles actualizados correctamente. Por favor, inicia sesión nuevamente para aplicar los cambios en tu sesión.",
+                esHost = dto.EsHost,
+                esGuest = dto.EsGuest
+            });
         }
     }
 }
