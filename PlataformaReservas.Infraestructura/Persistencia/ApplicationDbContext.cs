@@ -40,8 +40,8 @@ public class ApplicationDbContext : DbContext
             .HasColumnType("decimal(18,2)");
 
         modelBuilder.Entity<Propiedad>()
-            .Property(x=>x.Version)
-            .IsRowVersion();
+            .Property(x => x.Version)
+            .IsRowVersion(); 
 
         modelBuilder.Entity<Reserva>()
             .Property(x=>x.Estado)

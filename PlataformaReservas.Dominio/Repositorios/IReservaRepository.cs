@@ -7,6 +7,8 @@ public interface IReservaRepository
 {
         Task<Reserva?> ObtenerPorIdAsync(int id);
 
+        Task<bool> TieneReservasLaPropiedadAsync(int propiedadId);
+
         Task AgregarAsync(Reserva reserva);
 
         Task ActualizarAsync(Reserva reserva);
