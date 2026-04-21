@@ -18,18 +18,21 @@ public class PropiedadService : IPropiedadService
     private readonly IValidator<ActualizarPropiedadDto> _actualizarPropiedadValidator; 
     private readonly IUserContext _userContext;
 
+    private readonly IReservaRepository _reservaRepository;
+
     public PropiedadService(
         IPropiedadRepository propiedadRepository, 
         IValidator<CrearPropiedadDto> crearPropiedadValidator,
-        // 2. Lo inyectamos por el constructor
         IValidator<ActualizarPropiedadDto> actualizarPropiedadValidator, 
-        IUserContext userContext)
+        IUserContext userContext,
+        IReservaRepository reservaRepository)
     {
         _propiedadRepository = propiedadRepository;
         _crearPropiedadValidator = crearPropiedadValidator;
         // 3. Lo asignamos a la variable privada
         _actualizarPropiedadValidator = actualizarPropiedadValidator; 
         _userContext = userContext;
+        _reservaRepository = reservaRepository;
     }
 
     public async Task<Propiedad> CrearPropiedadAsync(CrearPropiedadDto dto)
@@ -80,6 +83,16 @@ public class PropiedadService : IPropiedadService
     public async Task EliminarPropiedadAsync(int id)
     {
         var propiedad = await ValidarYObtenerPropiedadPropia(id);
+        var tieneReservas = await _reservaRepository.TieneReservasLaPropiedadAsync(id);
+
+        if (tieneReservas)
+    {
+    
+        throw new AppException(
+            "No es posible eliminar esta propiedad porque cuenta con registros de reservas en su historial.", 
+            400, 
+            "PROPIEDAD_CON_DEPENDENCIAS");
+    }
         await _propiedadRepository.EliminarAsync(propiedad);
     }
 
@@ -99,7 +112,8 @@ public class PropiedadService : IPropiedadService
             PrecioPorNoche = p.PrecioPorNoche,
             Ubicacion = p.Ubicacion,
             ImagenUrl = p.ImagenUrl,
-            Capacidad = p.Capacidad
+            Capacidad = p.Capacidad,
+            HostId = p.HostId
         });
     }
 

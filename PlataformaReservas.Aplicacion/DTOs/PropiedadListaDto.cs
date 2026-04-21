@@ -8,4 +8,5 @@ public class PropiedadListaDto
     public string Ubicacion { get; set; } = null!;
     public string? ImagenUrl { get; set; }
     public int Capacidad { get; set; }
+    public int HostId { get; set; }
 }

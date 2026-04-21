@@ -12,6 +12,7 @@ using PlataformaReservas.Infraestructura.Persistencia;
 using PlataformaReservas.Infraestructura.Repositorios;
 using PlataformaReservas.Infraestructura.Services;
 using PlataformaReservas.Presentacion.Middlewares;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,16 +20,14 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsTotal", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
     });
 });
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 2. Inyección de Dependencias (REPOSITORIOS)
+// Repositorios
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IPropiedadRepository, PropiedadRepository>();
 builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
@@ -36,7 +35,7 @@ builder.Services.AddScoped<IFechaBloqueadaRepository, FechaBloqueadaRepository>(
 builder.Services.AddScoped<IResenaRepository, ResenaRepository>();
 builder.Services.AddScoped<INotificacionRepository, NotificacionRepository>();
 
-// 3. Inyección de Dependencias (SERVICIOS)
+// Servicios
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IPropiedadService, PropiedadService>();
 builder.Services.AddScoped<IReservaService, ReservaService>();
@@ -48,12 +47,8 @@ builder.Services.AddScoped<INotificacionFacade, NotificacionFacade>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPhotoService, PhotoService>();
 
-
-// 4. Registro de los Validadores (FluentValidation) automáticamente
 builder.Services.AddValidatorsFromAssemblyContaining<CrearPropiedadDto>();
 
-
-// 5. Configuración de JWT.
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "NoTeMolestesEnIntentarAdivinarEstSUperClave1234Pollopica";
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -67,23 +62,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// 6. Habilitar los Controladores y la Seguridad en Swagger
+// Configuración de API
 builder.Services.AddControllers()
     .AddJsonOptions(options => 
     {
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    })
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        // Esto permite que ExceptionMiddleware atrape los errores de validación
+        options.SuppressModelStateInvalidFilter = true;
     });
     
 builder.Services.AddEndpointsApiExplorer();
-
-
-
 builder.Services.AddHttpContextAccessor();
-
 
 builder.Services.AddSwaggerGen(c =>
 {
-    // Configuramos Swagger para que acepte el Token JWT
     c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -108,32 +103,23 @@ builder.Services.AddSwaggerGen(c =>
             new string[] {}
         }
     });
-
-
-    
 });
-
 
 var app = builder.Build();
 
-    app.UseMiddleware<ExceptionMiddleware>();
-  
-    if (app.Environment.IsDevelopment())
-    {
-        app.UseSwagger();
-        app.UseSwaggerUI();
-    }
+// El Middleware atrapa todo desde arriba
+app.UseMiddleware<ExceptionMiddleware>();
 
-    //app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
-    app.UseStaticFiles(); 
+app.UseStaticFiles(); 
+app.UseCors("CorsTotal");
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
 
-    
-    app.UseCors("CorsTotal");
-
-    app.UseAuthentication();
-    app.UseAuthorization();
-
-    app.MapControllers();
-
-    app.Run();
+app.Run();

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -25,12 +27,10 @@ namespace PlataformaReservas.Presentacion.Middlewares
         {
             try
             {
-                // Dejamos que la petición continúe su camino normal hacia los controladores
                 await _next(context);
             }
             catch (Exception ex)
             {
-                // Si explota en cualquier parte, lo atrapamos aquí en el aire
                 await HandleExceptionAsync(context, ex, _logger);
             }
         }
@@ -45,22 +45,18 @@ namespace PlataformaReservas.Presentacion.Middlewares
 
             context.Response.ContentType = "application/json";
 
-            // 1. Asumimos un error grave por defecto (500)
             var statusCode = (int)HttpStatusCode.InternalServerError;
             var message = "Ha ocurrido un error inesperado en el servidor.";
             var errorCode = "ERROR_INTERNO";
             IReadOnlyDictionary<string, string[]>? validationErrors = null;
 
-            // 2. Evaluamos si es un error controlado de nuestras reglas de negocio
             if (exception is AppException appEx)
             {
                 statusCode = appEx.StatusCode;
                 message = appEx.Message;
                 errorCode = appEx.Code;
-
                 logger.LogWarning("Regla de negocio no cumplida: {Message} (Status: {Status})", message, statusCode);
             }
-            // 3. Evaluamos si es un error de campos vacíos o inválidos (FluentValidation)
             else if (exception is ValidationException valEx)
             {
                 statusCode = (int)HttpStatusCode.BadRequest;
@@ -70,7 +66,13 @@ namespace PlataformaReservas.Presentacion.Middlewares
                     .GroupBy(e => e.PropertyName, e => e.ErrorMessage)
                     .ToDictionary(g => g.Key, g => g.ToArray());
             }
-            // 4. Si es algo peor (se cayó la BD, error de sintaxis, etc.)
+            else if (exception is InvalidOperationException invEx)
+            {
+                // Captura el token inválido sin romper la app
+                statusCode = (int)HttpStatusCode.BadRequest;
+                message = invEx.Message;
+                errorCode = "ERROR_DE_DOMINIO";
+            }
             else
             {
                 logger.LogError(exception, "Ha ocurrido un error crítico no controlado.");

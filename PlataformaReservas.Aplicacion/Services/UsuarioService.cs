@@ -12,7 +12,7 @@ using PlataformaReservas.Dominio.Repositorios;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using PlataformaReservas.Dominio.Excepciones;
-
+using PlataformaReservas.Aplicacion.Helpers; 
 
 namespace PlataformaReservas.Aplicacion.Services;
 
@@ -23,8 +23,7 @@ public class UsuarioService : IUsuarioService
     private readonly IValidator<RegistrarUsuarioDto> _registrarValidator;
     private readonly IValidator<LoginUsuarioDto> _loginValidator;
     private readonly IConfiguration _config;
-
-      private readonly IUserContext _userContext;
+    private readonly IUserContext _userContext;
 
     public UsuarioService(IUsuarioRepository usuarioRepository, IUserContext userContext, IEmailService emailService, IValidator<RegistrarUsuarioDto> registrarValidator, IValidator<LoginUsuarioDto> loginValidator, IConfiguration config)
     {
@@ -50,15 +49,18 @@ public class UsuarioService : IUsuarioService
         nuevo.GenerarTokenConfirmacion(Guid.NewGuid().ToString("N"), DateTime.UtcNow.AddHours(24));
         await _usuarioRepository.AgregarAsync(nuevo);
 
-        // Restauramos el envío de correo
         string urlConfirmacion = $"http://localhost:5173/confirmar-cuenta?email={nuevo.Email}&token={nuevo.TokenConfirmacion}";
-        string htmlBody = $@"
-        <div style='font-family: Arial, sans-serif; padding: 20px;'>
-            <h1 style='color: #FF5A5F;'>¡Bienvenido, {nuevo.Nombre}!</h1>
-            <a href='{urlConfirmacion}'>Verificar mi Cuenta</a>
-        </div>";
+        
+        // Generamos el HTML hermoso
+        string htmlBody = PlantillasEmail.ObtenerPlantillaBase(
+            titulo: $"¡Bienvenido a Air reservas, {nuevo.Nombre}!",
+            mensaje: "Estamos felices de tenerte con nosotros. Para empezar a explorar alojamientos increíbles y gestionar tus reservas, confirma tu cuenta en el botón de abajo.",
+            textoBoton: "Confirmar mi Cuenta",
+            urlBoton: urlConfirmacion
+        );
 
-        await _emailService.EnviarCorreoAsync(nuevo.Email, "Verifica tu cuenta", htmlBody);
+        // Enviamos el correo solo UNA vez
+        await _emailService.EnviarCorreoAsync(nuevo.Email, "Bienvenido a Air reservas - Confirma tu cuenta", htmlBody);
 
         return nuevo;
     }
@@ -76,7 +78,6 @@ public class UsuarioService : IUsuarioService
         if (!usuario.CuentaConfirmada)
             throw new AppException("Debes confirmar tu cuenta por correo antes de entrar.", 400, "ERROR_NEGOCIO");
 
-        // Generamos el Token aquí (Logica de negocio limpia)
         var tokenHandler = new JwtSecurityTokenHandler();
         var jwtKey = _config["Jwt:Key"] ?? "NoTeMolestesEnIntentarAdivinarEstSUperClave1234Pollopica";
         var key = Encoding.UTF8.GetBytes(jwtKey);
@@ -118,19 +119,12 @@ public class UsuarioService : IUsuarioService
     public async Task ActualizarRolesAsync(ActualizarRolDto dto)
     {
         var usuarioId = _userContext.UserId ?? throw new AppException("Sesión no válida.", 401, "NO_AUTORIZADO");
-        // Asumimos que tienes un ObtenerPorIdAsync en tu IUsuarioRepository. 
-        // Si no lo tienes, deberás agregarlo igual que tienes ObtenerPorEmailAsync.
         var usuario = await _usuarioRepository.ObtenerPorIdAsync(usuarioId);
         
         if (usuario == null) 
             throw new AppException("Usuario no encontrado.", 404, "ERROR_NEGOCIO");
 
-    
-        // Actualizamos las propiedades. 
-        // Nota: Si tus propiedades tienen el 'set' privado en la entidad Usuario, 
-        // tendrás que crear un método en la entidad (ej: usuario.ActualizarRoles(dto.EsHost, dto.EsGuest))
         usuario.ActualizarRoles(dto.EsHost, dto.EsGuest);
-
         await _usuarioRepository.ActualizarAsync(usuario);
     }
 }

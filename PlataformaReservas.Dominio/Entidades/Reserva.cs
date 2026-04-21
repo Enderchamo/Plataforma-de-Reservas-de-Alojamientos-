@@ -1,3 +1,6 @@
+// PlataformaReservas.Dominio/Entidades/Reserva.cs
+using PlataformaReservas.Dominio.Excepciones;
+
 namespace PlataformaReservas.Dominio.Entidades;
 
 public class Reserva
@@ -19,13 +22,14 @@ public class Reserva
 
     public EstadoEnum Estado { get; protected set; }
 
+    // Constructor para Entity Framework
+    protected Reserva() { }
 
-
-    public Reserva(int propiedadId,int usuarioInvitadoId, DateTime fechaEntrada, DateTime fechaSalida)
+    public Reserva(int propiedadId, int usuarioInvitadoId, DateTime fechaEntrada, DateTime fechaSalida)
     {
         Estado = EstadoEnum.Confirmada;
-        FechaEntrada= fechaEntrada;
-        FechaSalida= fechaSalida;
+        FechaEntrada = fechaEntrada;
+        FechaSalida = fechaSalida;
         PropiedadId = propiedadId;
         UsuarioInvitadoId = usuarioInvitadoId;
     }
@@ -34,12 +38,13 @@ public class Reserva
     {
         if (Estado != EstadoEnum.Confirmada)
         {
-            throw new InvalidOperationException("No se puede cancelar la reserva. La reserva no está confirmada.");
+            // 🛠️ Usamos AppException (400) para reglas de negocio
+            throw new AppException("No se puede cancelar la reserva. La reserva no está confirmada.", 400);
         }
 
         if (fechaSolicitud.Date >= FechaEntrada.Date)
         {
-            throw new InvalidOperationException("Es demasiado tarde para cancelar esta reserva. Solo se permiten cancelaciones hasta un día antes de la llegada.");
+            throw new AppException("Es demasiado tarde para cancelar esta reserva. Solo se permiten cancelaciones hasta un día antes de la llegada.", 400);
         }
 
         Estado = EstadoEnum.Cancelada;
@@ -49,20 +54,15 @@ public class Reserva
     {
         if (Estado != EstadoEnum.Confirmada)
         {
-            throw new InvalidOperationException($"No se puede completar esta reserva porque actualmente está en estado: {Estado}. Solo se pueden completar reservas Confirmadas.");
+            throw new AppException($"No se puede completar esta reserva porque actualmente está en estado: {Estado}. Solo se pueden completar reservas Confirmadas.", 400);
         }
         
-        if (DateTime.UtcNow < FechaSalida)
-        {
-            throw new InvalidOperationException($"Aún no puedes completar esta reserva. Podrás hacerlo después de la fecha de salida ({FechaSalida:dd/MM/yyyy HH:mm}).");
-        }
+        // Validación de fecha para asegurar que la estancia terminó
+        // if (DateTime.UtcNow < FechaSalida)
+        // {
+        //     throw new AppException($"Aún no puedes completar esta reserva. Podrás hacerlo después de la fecha de salida ({FechaSalida:dd/MM/yyyy HH:mm}).", 400);
+        // }
 
         Estado = EstadoEnum.Completada;
-        Estado = EstadoEnum.Completada;
-        
     }
-
-    
 }
-
-
