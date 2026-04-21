@@ -35,5 +35,13 @@ namespace PlataformaReservas.Presentacion
             var fechas = await _fechaBloqueadaService.ObtenerPorPropiedadAsync(propiedadId);
             return Ok(fechas);
         }
+
+        [Authorize(Roles = "Host")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> EliminarBloqueo(int id)
+        {
+            await _fechaBloqueadaService.EliminarBloqueoAsync(id);
+            return Ok(new { mensaje = "Bloqueo eliminado correctamente." });
+        }
     }
 }
